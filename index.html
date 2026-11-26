@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>文本驱动的时序预测 · 效应语言</title>
+<meta name="description" content="用背景文本改进时间序列预测：效应语言与两阶段方法（进展汇报）">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0d12;--bg2:#10131a;--panel:#161a23;--panel2:#1c2130;--line:#262c3a;
+  --text:#e8ebf1;--muted:#9aa3b5;--accent:#5eead4;--accent2:#f59e0b;--accent3:#818cf8;--bad:#f87171;
+  --radius:16px;--maxw:1180px;
+  --sans:"Inter","Noto Sans SC",system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.65;font-size:16px;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+code,pre{font-family:var(--mono);font-size:.88em}
+code{background:#20263a;padding:.1em .4em;border-radius:6px;color:#c7d2fe}
+pre{background:#0d1017;border:1px solid var(--line);border-radius:12px;padding:14px 16px;overflow:auto;line-height:1.55;margin:0 0 14px}
+pre code{background:none;padding:0;color:#d6dbe6}
+h1,h2,h3,h4{line-height:1.25;margin:0 0 .5em;font-weight:700;letter-spacing:-.01em}
+h2{font-size:clamp(26px,3.2vw,36px)}
+h3{font-size:20px}
+h4{font-size:16px;color:var(--accent);margin-bottom:.4em}
+p{margin:0 0 1em}
+.muted{color:var(--muted)}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+strong{color:#fff}
+
+nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(11,13,18,.72);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;gap:22px;height:58px}
+nav .brand{font-weight:800;letter-spacing:.02em;color:var(--text);display:flex;align-items:center;gap:10px}
+nav .brand i{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent3));display:inline-block}
+nav ul{list-style:none;display:flex;gap:4px;margin:0 0 0 auto;padding:0}
+nav li a{display:block;padding:6px 12px;border-radius:999px;color:var(--muted);font-size:14px;font-weight:500}
+nav li a:hover,nav li a.active{color:var(--text);background:var(--panel2);text-decoration:none}
+@media(max-width:860px){nav ul{display:none}}
+
+.hero{position:relative;overflow:hidden;padding:84px 0 64px;border-bottom:1px solid var(--line);
+  background:radial-gradient(900px 420px at 18% -10%,rgba(94,234,212,.16),transparent 60%),
+             radial-gradient(700px 400px at 90% 10%,rgba(129,140,248,.18),transparent 60%),var(--bg)}
+.hero .grid{display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center}
+@media(max-width:960px){.hero .grid{grid-template-columns:1fr}}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:18px}
+.eyebrow::before{content:"";width:28px;height:2px;background:var(--accent)}
+.hero h1{font-size:clamp(32px,4.6vw,52px);font-weight:800;margin-bottom:18px}
+.hero h1 span{background:linear-gradient(90deg,var(--accent),var(--accent3));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p.lead{font-size:18px;color:var(--muted);max-width:640px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:30px}
+@media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{background:rgba(22,26,35,.8);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.stat b{display:block;font-size:24px;white-space:nowrap;font-weight:800;letter-spacing:-.02em}
+.stat span{font-size:13px;color:var(--muted);line-height:1.4;display:block}
+.hero-media{margin:0;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);box-shadow:0 30px 80px rgba(0,0,0,.5);background:var(--panel)}
+.hero-media .inner{padding:20px 22px 8px}
+.hero-media figcaption{padding:10px 16px;font-size:13px;color:var(--muted);background:var(--bg2);border-top:1px solid var(--line)}
+
+section{padding:84px 0}
+section + section{border-top:1px solid var(--line)}
+.sec-head{display:grid;grid-template-columns:auto 1fr;gap:18px 26px;align-items:end;margin-bottom:40px}
+@media(max-width:640px){.sec-head{grid-template-columns:1fr}}
+.sec-head .num{font-family:var(--mono);color:var(--accent2);font-size:14px;letter-spacing:.2em;align-self:start;padding-top:10px;white-space:nowrap}
+.sec-head p{color:var(--muted);max-width:780px;margin:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px}
+.card h3{margin-top:0}
+.card p:last-child,.card ul:last-child{margin-bottom:0}
+.cards{display:grid;gap:18px;align-items:stretch}
+.cards.c2{grid-template-columns:repeat(2,1fr)}
+.cards.c3{grid-template-columns:repeat(3,1fr)}
+@media(max-width:960px){.cards.c3{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.cards.c2,.cards.c3{grid-template-columns:1fr}}
+.sub{margin:56px 0 20px;display:flex;align-items:center;gap:14px}
+.sub h3{margin:0}
+.sub .tag{font-family:var(--mono);font-size:12px;color:var(--accent2)}
+.sub::after{content:"";flex:1;height:1px;background:var(--line)}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:600;background:#1f2a3a;color:var(--accent);border:1px solid #27405a;vertical-align:middle;white-space:nowrap}
+.pill.amber{color:var(--accent2);background:#2b2416;border-color:#4a3a17}
+.pill.violet{color:#c7d2fe;background:#232745;border-color:#3b3f78}
+.pill.red{color:#fecaca;background:#3a1d1f;border-color:#5b2a2d}
+
+table{width:100%;border-collapse:collapse;font-size:14.5px}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:13px;letter-spacing:.04em}
+td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr.ours td{background:rgba(94,234,212,.07)}
+tr.ours td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel);margin-bottom:12px}
+.note{font-size:13.5px;color:var(--muted);margin:6px 0 20px}
+
+.formula{font-family:var(--mono);background:#0d1017;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;padding:14px 18px;margin:10px 0 14px;overflow:auto;font-size:14.5px;color:#dfe5f1}
+.formula small{display:block;color:var(--muted);font-family:var(--sans);font-size:13px;margin-top:6px}
+ul.tight{margin:.2em 0 .6em;padding-left:1.2em}
+ul.tight li{margin:.3em 0}
+
+.flow{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:8px 0 26px}
+@media(max-width:960px){.flow{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){.flow{grid-template-columns:repeat(2,1fr)}}
+.step{position:relative;background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:14px;padding:16px 14px 14px}
+.step .n{font-family:var(--mono);font-size:12px;color:var(--accent2);margin-bottom:6px}
+.step b{display:block;font-size:15px;margin-bottom:4px}
+.step span{font-size:13px;color:var(--muted);line-height:1.45;display:block}
+.step.model{border-color:#2f6f66}
+.step.code{border-color:#4a3a17}
+.step::after{content:"→";position:absolute;right:-13px;top:46%;color:#3a4256;font-size:18px;z-index:1}
+.step:last-child::after{content:""}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--muted);margin:0 0 18px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+
+.bars{display:grid;gap:7px}
+.bar{display:grid;grid-template-columns:minmax(150px,210px) 1fr 56px;gap:12px;align-items:center;font-size:13.5px}
+.bar .lab{color:var(--muted);text-align:right;line-height:1.25}
+.bar .track{height:18px;border-radius:5px;background:rgba(255,255,255,.035);position:relative}
+.bar .fill{height:100%;border-radius:0 5px 5px 0;background:#3a4256}
+.bar .val{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.bar.ours .lab,.bar.ours .val{color:var(--text);font-weight:700}
+.bar.ours .fill{background:linear-gradient(90deg,var(--accent),var(--accent3))}
+.bars .axis{font-size:12px;color:var(--muted);text-align:right;margin-top:4px}
+@media(max-width:560px){.bar{grid-template-columns:120px 1fr 48px;font-size:12px}}
+
+.tabs{display:flex;flex-wrap:wrap;gap:6px;border-bottom:1px solid var(--line);margin-bottom:26px}
+.tabs button{background:none;border:none;color:var(--muted);font:inherit;font-weight:600;padding:10px 14px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button.active{color:var(--text);border-bottom-color:var(--accent)}
+.tabpanel{display:none}.tabpanel.active{display:block}
+
+details{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:0 18px;margin:10px 0}
+details summary{cursor:pointer;padding:14px 0;font-weight:600;list-style:none;display:flex;align-items:center;gap:10px}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:"+";font-family:var(--mono);color:var(--accent);width:16px}
+details[open] summary::before{content:"–"}
+details .body{padding:0 0 16px;color:var(--muted);font-size:14.5px}
+
+.explain{font-size:14.5px}
+.explain .item{border-left:3px solid var(--accent);padding:6px 0 6px 14px;margin:0 0 14px}
+.explain .item.drop{border-left-color:var(--bad)}
+.explain .k{color:var(--muted);font-family:var(--mono);font-size:12.5px;margin-right:8px}
+.quote{color:#d6dbe6;font-style:italic}
+.big{font-size:30px;font-weight:800;letter-spacing:-.02em;display:block;line-height:1.2}
+
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion: reduce){.reveal{opacity:1;transform:none;transition:none}}
+
+footer{padding:40px 0 60px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+footer .wrap{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+@media(max-width:760px){footer .wrap{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#top"><i></i>Text → Effects → Forecast</a>
+    <ul>
+      <li><a href="#overview">概览</a></li>
+      <li><a href="#background">背景</a></li>
+      <li><a href="#motivation">动机</a></li>
+      <li><a href="#method">方法</a></li>
+      <li><a href="#experiments">实验</a></li>
+      <li><a href="#limits">局限与下一步</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap grid">
+    <div>
+      <div class="eyebrow">Context-aided time-series forecasting</div>
+      <h1>用背景文本<br>改进时间序列预测<br><span>效应语言</span> · 两阶段方法</h1>
+      <p class="lead">在文本和预测之间放一层可检查的“效应语言”：9B 语言模型把文本解析成效应，确定性编译器把效应变成逐步约束和协变量，并带有可证明的安全保证；微调后的 Chronos-2 在这些条件下做预测。第二阶段的训练不需要成对的文本–序列数据。</p>
+      <div class="stats">
+        <div class="stat"><b>0.476</b><span>GIFT-Eval-CTX 总分<br>榜单第一 0.497</span></div>
+        <div class="stat"><b>0.155</b><span>Context-is-Key RCRPS<br>TimeBraid 0.289–0.294</span></div>
+        <div class="stat"><b>9B+0.12B</b><span>语言模型 + 时序模型<br>不依赖前沿大模型</span></div>
+        <div class="stat"><b>0 次</b><span>安全保证被违反<br>225 万步实证检验</span></div>
+      </div>
+    </div>
+    <figure class="hero-media">
+      <div class="inner">
+        <h4 style="color:var(--text)">GIFT-Eval-CTX · 总分（越低越好）</h4>
+        <div class="bars" id="hero-bars"></div>
+      </div>
+      <figcaption>所有方法的输入相同（历史 + Macro + Micro）。我们的结果为两个种子的平均；其余为榜单每题结果，用榜单代码重新汇总。</figcaption>
+    </figure>
+  </div>
+</header>
+
+<!-- ============ OVERVIEW ============ -->
+<section id="overview">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="num">00 / 概览</div>
+      <div>
+        <h2>一句话概括</h2>
+        <p>模型负责“指出”，代码负责“计算”：语言模型只照抄原文中的时间和数值，并判断效应类型；换算、约束执行、安全投影都由确定性程序完成；时序模型负责补全文本没说清的部分，例如只给了方向时的幅度、外部输入与目标之间的关系。</p>
+      </div>
+    </div>
+    <div class="legend reveal"><span><i style="background:#2f6f66"></i>学习的模型</span><span><i style="background:#4a3a17"></i>确定性程序</span></div>
+    <div class="flow reveal">
+      <div class="step"><div class="n">IN</div><b>背景文本</b><span>或结构化效应（GIFT-Eval-CTX）</span></div>
+      <div class="step model"><div class="n">01</div><b>文本解析</b><span>Qwen3.5-9B + LoRA，输出效应行，原文片段照抄</span></div>
+      <div class="step code"><div class="n">02</div><b>照抄核对 + 编译</b><span>片段须在原文中；换算成逐步约束、模板、协变量</span></div>
+      <div class="step model"><div class="n">03</div><b>条件预测</b><span>Chronos-2 全量微调，以效应序列为已知未来协变量</span></div>
+      <div class="step code"><div class="n">04</div><b>安全投影</b><span>已确认的约束逐步截断；有可证明的保证</span></div>
+      <div class="step"><div class="n">OUT</div><b>预测 + 说明</b><span>25 个样本；自动生成可溯源的预测说明</span></div>
+    </div>
+    <div class="cards c3 reveal">
+      <div class="card"><h4>贡献 1 · 效应语言与安全保证</h4><p class="muted">文本和结构化信息编译到同一种带形式语义的中间表示；陈述为真时截断不会让预测变差，为假时损失有界。</p></div>
+      <div class="card"><h4>贡献 2 · 不需要成对数据的训练</h4><p class="muted">从真实序列的未来中提取效应，加入“说了但没发生”的陈述、不同精度的描述和外部输入，自监督地训练以效应为条件的预测模型。</p></div>
+      <div class="card"><h4>贡献 3 · 小模型、可溯源</h4><p class="muted">9B + 0.12B 在两个基准上超过 TimeBraid 和基于 GPT-5.6 的智能体；每个效应都能追溯到原文句子。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BACKGROUND ============ -->
+<section id="background">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="num">01 / 背景</div>
+      <div>
+        <h2>任务与基准</h2>
+        <p>给定一段序列的历史，以及与之相关的背景信息，预测未来 H 步。点预测和概率预测都要评价。背景信息可能是结构化的效应描述，也可能是自然语言。</p>
+      </div>
+    </div>
+    <div class="cards c2 reveal">
+      <div class="card">
+        <h3>GIFT-Eval-CTX <span class="pill">结构化效应</span></h3>
+        <ul class="tight muted">
+          <li>10,000 道题，78 个“数据集 × 预测长度”组；短、中、长期，最长 900 步</li>
+          <li>背景信息：<b style="color:var(--text)">Macro</b>（趋势、全程水平范围、季节性）与 <b style="color:var(--text)">Micro</b>（局部偏移、跳变）</li>
+          <li>指标：相对季节性朴素预测的 MASE，按组取几何平均</li>
+          <li>检验：能否把效应信息用好（第二阶段）</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Context-is-Key <span class="pill violet">自然语言</span></h3>
+        <ul class="tight muted">
+          <li>355 道题，71 类任务；一般预测 24–100 步</li>
+          <li>背景信息：事件、约束、因果关系、外部输入、历史异常等的文本描述</li>
+          <li>指标：官方 RCRPS，即概率预测误差，重点区域加权，违反约束会被重罚</li>
+          <li>检验：能否读懂文本并用好（完整链路）</li>
+        </ul>
+      </div>
+    </div>
+    <div class="sub reveal"><h3>现有路线</h3></div>
+    <div class="table-wrap reveal">
+      <table>
+        <tr><th>路线</th><th>代表</th><th>局限</th></tr>
+        <tr><td>时序基础模型，只看历史</td><td>Chronos-2、TimesFM、Moirai</td><td class="muted">用不上文本</td></tr>
+        <tr><td>大模型直接给出预测</td><td>GPT、Gemini、Llama 直接提示</td><td class="muted">依赖前沿大模型；数值由模型生成，过程不可检查</td></tr>
+        <tr><td>端到端融合文本和序列</td><td>TimeBraid（1.2B–6.7B）</td><td class="muted">需要大规模成对数据；在两个基准上都接近纯历史预测的水平</td></tr>
+        <tr><td>智能体调用工具</td><td>MoiraiAgent（GPT-5.6）</td><td class="muted">依赖前沿大模型，成本高</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MOTIVATION ============ -->
+<section id="motivation">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="num">02 / 动机</div>
+      <div>
+        <h2>从观察到设计</h2>
+        <p>每一项设计都对应一个具体的观察。</p>
+      </div>
+    </div>
+    <div class="table-wrap reveal">
+      <table>
+        <tr><th style="width:52%">观察</th><th>由此得到的设计</th></tr>
+        <tr><td>文本里对预测有用的，大多是可以精确表达的“效应”：某段时间等于多少、不超过多少、上升还是下降、外部输入怎么变</td><td>定义一种<b>效应语言</b>作为文本和预测之间的中间表示</td></tr>
+        <tr><td>大模型读文本没问题，但直接输出时，时间换算对的只有 55%（9B）到 75%（27B）</td><td>语言模型只<b>指出</b>原文片段，换算交给确定性的编译器</td></tr>
+        <tr><td>读错的效应会损害预测</td><td>约束执行要有<b>可证明的安全性</b>：陈述为真时不变差，为假时损失有界</td></tr>
+        <tr><td>文本给的信息常常不完整：只有方向、只有极值、只有形状、只有外部输入</td><td>训练一个<b>以效应为条件</b>的时序模型，从历史中补全</td></tr>
+        <tr><td>成对的“文本–序列”数据稀缺</td><td>从序列的真实未来中自动提取效应，<b>自监督</b>地训练第二阶段</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ METHOD ============ -->
+<section id="method">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="num">03 / 方法</div>
+      <div>
+        <h2>效应语言 + 两阶段</h2>
+        <p>文本前端（Context-is-Key）和结构化前端（GIFT-Eval-CTX）都编译到同一种效应语言，之后的编译、预测、投影完全共用。</p>
+      </div>
+    </div>
+
+    <div class="sub reveal"><span class="tag">3.1</span><h3>效应语言</h3></div>
+    <div class="table-wrap reveal">
+      <table>
+        <tr><th>效应</th><th>例子</th><th>语义（编译结果）</th><th>执行</th></tr>
+        <tr><td>精确值 / 倍数 / 增减 / 百分比</td><td class="muted">“平时的 4 倍”“降为零”</td><td>某几步等于 v</td><td><span class="pill amber">硬约束</span></td></tr>
+        <tr><td>范围、上限、下限</td><td class="muted">“不超过 6.29”</td><td>某几步落在 [a, b]</td><td><span class="pill amber">硬约束</span></td></tr>
+        <tr><td>全程水平范围</td><td class="muted">Macro 的水平范围</td><td>所有步落在 [a, b]</td><td><span class="pill amber">硬约束</span></td></tr>
+        <tr><td>仅方向</td><td class="muted">“节假日车流会减少”</td><td>某几步高于或低于平时</td><td><span class="pill">模型推断幅度</span></td></tr>
+        <tr><td>趋势、季节幅度、反复偏移、季节性</td><td class="muted">Macro 的趋势和季节性</td><td>形状模板</td><td><span class="pill">模型</span></td></tr>
+        <tr><td>外部输入时间表</td><td class="muted">“负载 0.2，从 05:48:01 到 05:48:27”；参考序列；“10 点转晴”</td><td>历史加未来的逐步输入序列</td><td><span class="pill">模型学习关系</span></td></tr>
+        <tr><td>历史屏蔽</td><td class="muted">“每 15 天维护 7 天，未来不再维护”</td><td>历史中的异常时段标为缺失</td><td><span class="pill amber">程序</span></td></tr>
+      </table>
+    </div>
+    <p class="note reveal">每条效应带有可信度（已确认 / 传闻）。传闻只作为提示交给模型，不作为硬约束执行。</p>
+
+    <div class="sub reveal"><span class="tag">3.2</span><h3>第一阶段：文本 → 效应语言</h3></div>
+    <div class="cards c2 reveal">
+      <div class="card">
+        <h4>模型与输出</h4>
+        <ul class="tight muted">
+          <li>Qwen3.5-9B + LoRA 适配器；原模型权重不变，对话能力保留</li>
+          <li>每条陈述一行；时间和数值<b style="color:var(--text)">照抄原文</b>，不自己计算</li>
+          <li>照抄的片段必须能在原文中找到，否则丢弃；换算成第几步、多少数值，由代码完成</li>
+        </ul>
+        <h4 style="margin-top:14px">训练数据（约 8 万条，不含测试文本）</h4>
+        <ul class="tight muted">
+          <li>模板文本，以及 27B 改写的自然文本</li>
+          <li>CAF-7M 训练集的真实文本：27B 标注，经“换算回去与标注一致”核对后保留</li>
+          <li>外部输入、参考序列、状态变化、历史屏蔽的合成段落</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>输出示例</h4>
+<pre><code><span style="color:#9aa3b5"># 效应：类型 | 时间关系 | 时间（照抄）| 数值（照抄）| 方向 | 节奏 | 可信度 | 重复</span>
+electricity | multiple of usual | fromfor |
+  from 2013-05-28 12:00:00 for 2 hours | 4 |
+  up | sustained | confirmed | no
+
+<span style="color:#9aa3b5"># 外部输入：名称 | 时间（照抄）| 数值（照抄）</span>
+input | load | from 05:48:01 until 05:48:27 | 0.2
+
+<span style="color:#9aa3b5"># 历史屏蔽：时间 | 持续 | 重复</span>
+exclude | starting from 1996-08-12 00:00:00 |
+  7 days | every 15 days</code></pre>
+      </div>
+    </div>
+
+    <div class="sub reveal"><span class="tag">3.3</span><h3>效应编译与安全投影</h3></div>
+    <p class="reveal muted" style="max-width:860px">预测之后，对已确认的约束做逐步截断：区间约束对每个样本截断，精确值把分布的中位数平移到该值、离散程度不变。设某一步的预测分布为 F，真实值为 y，约束区间为 C = [a, b]。</p>
+    <div class="cards c3 reveal">
+      <div class="card">
+        <h4>定理 1 · 真约束不变差</h4>
+        <div class="formula">y ∈ C ⇒ CRPS(F′, y) ≤ CRPS(F, y)<small>点预测：|clip(x) − y| ≤ |x − y|</small></div>
+        <p class="muted" style="font-size:14px">截断只把区间外的累积分布压到 0 或提到 1，而真实值不在那里，所以被积函数逐点不增。</p>
+      </div>
+      <div class="card">
+        <h4>定理 2 · 假约束损失有界</h4>
+        <div class="formula">y ∉ C, d = dist(y, C) ⇒ CRPS(F′, y) ≤ CRPS(F, y) + d<small>点预测：误差 ≤ max(原误差, d)</small></div>
+        <p class="muted" style="font-size:14px">只有 y 与区间之间长度为 d 的一段会变差，每点最多增加 1。</p>
+      </div>
+      <div class="card">
+        <h4>命题 3 · 精确值平移</h4>
+        <div class="formula">δ = |v − y| ⇒ CRPS(F′, y) ≤ CRPS(F, y) + 2δ<small>陈述准确（δ = 0）时不增加</small></div>
+        <p class="muted" style="font-size:14px">中位数使 E|X − c| 最小，再用两次三角不等式即可。</p>
+      </div>
+    </div>
+    <p class="note reveal">含义：代码层是可证明的“安全层”，损失只可能来自读错，或者文本本身不准确。端到端模型和大模型直接提示都没有这种保证。</p>
+
+    <div class="sub reveal"><span class="tag">3.4</span><h3>第二阶段：以效应为条件的预测</h3></div>
+    <div class="cards c2 reveal">
+      <div class="card">
+        <h4>模型</h4>
+        <ul class="tight muted">
+          <li>Chronos-2 全量微调（约 1.2 亿参数）</li>
+          <li>11 条效应通道 + 1 条外部输入通道，作为已知的未来协变量输入</li>
+          <li>通道：下界、上界、方向、可信度、全程上下界、趋势模板、季节幅度、反复偏移方向和水平、季节性、外部输入</li>
+        </ul>
+        <h4 style="margin-top:14px">训练流程（定稿版本 E16）</h4>
+        <ul class="tight muted">
+          <li>短窗口（24–48 步）8,000 步</li>
+          <li>+ 长窗口（480 / 720 步）与短窗口回放，8,000 步</li>
+          <li>+ 外部输入，3,000 步</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>自监督训练数据（不需要任何文本）</h4>
+        <ul class="tight muted">
+          <li>GIFT-Eval 预训练集的真实窗口，不含测试数据</li>
+          <li>用规则从<b style="color:var(--text)">真实未来</b>中提取效应：一半按结构化格式描述，一半按文本格式描述</li>
+          <li>描述分三档精度：精确值、大致幅度、仅方向</li>
+          <li>写入大幅度效应；加入“说了但没发生”的陈述和可信度标签</li>
+          <li>约 30% 的窗口加入由人造外部输入驱动的成分：比例、平方、带延迟的关系，以及与目标无关的输入</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="sub reveal"><span class="tag">3.5</span><h3>推理与可溯源说明</h3></div>
+    <div class="cards c2 reveal">
+      <div class="card">
+        <h4>混合方案</h4>
+        <ul class="tight muted">
+          <li>有陈述的步：第二阶段模型，再做安全投影</li>
+          <li>没有陈述的步、精确值的步：以原版 Chronos-2 的预测为基础</li>
+          <li>没有读出任何效应：原版 Chronos-2 只看历史的预测</li>
+        </ul>
+        <p class="muted" style="font-size:14px">说明由代码根据效应行和预测结果自动生成，不让语言模型自由发挥，每一句都能追溯到原文和计算过程。</p>
+      </div>
+      <div class="card explain">
+        <h4>自动生成的说明（节选）</h4>
+        <div class="item">
+          <div><span class="k">效应 1</span><b>平时的倍数</b> <span class="pill amber">已确认</span></div>
+          <div class="quote">“…a heat wave in city A from 2013-05-28 12:00:00 for 2 hours, … 4 times the usual electricity being consumed.”</div>
+          <div class="muted">第 9–10 步（12:00–13:00）· 平时水平 519 → 最终预测 2075（+300%）</div>
+        </div>
+        <div class="item drop">
+          <div><span class="k">效应 2</span><b>百分比变化</b> <span class="pill red">已丢弃</span></div>
+          <div class="quote">“…caused a major dip of 75% in electricity consumption 2 weeks ago.”</div>
+          <div class="muted">陈述的时间不在预测期内</div>
+        </div>
+        <div class="muted" style="font-size:13.5px">其余 22 步：文本没有陈述，沿用原版 Chronos-2 的纯历史预测。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ EXPERIMENTS ============ -->
+<section id="experiments">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="num">04 / 实验</div>
+      <div>
+        <h2>结果</h2>
+        <p>GIFT-Eval-CTX 用官方数据和榜单的汇总代码；我们复算的季节性朴素预测、Chronos-2、TimeBraid 的每题 MASE 与公开结果完全一致（10,000 / 10,000）。Context-is-Key 用官方 RCRPS 脚本，每题 25 个样本。第二阶段每个设置训练两个随机种子。</p>
+      </div>
+    </div>
+
+    <div class="tabs reveal" role="tablist">
+      <button class="active" data-tab="t-gift">GIFT-Eval-CTX</button>
+      <button data-tab="t-cik">Context-is-Key</button>
+      <button data-tab="t-s2">第二阶段的价值</button>
+      <button data-tab="t-s1">第一阶段准确率</button>
+      <button data-tab="t-safe">安全性与稳健性</button>
+    </div>
+
+    <!-- GIFT -->
+    <div class="tabpanel active" id="t-gift">
+      <div class="cards c2">
+        <div class="card"><h4 style="color:var(--text)">总分（越低越好）</h4><div class="bars" id="gift-bars"></div></div>
+        <div class="card">
+          <h4 style="color:var(--text)">要点</h4>
+          <ul class="tight muted">
+            <li>总分 0.476，好于榜单第一 MoiraiAgent（0.497，GPT-5.6 智能体）</li>
+            <li>中期、长期优势明显（0.59 / 0.54 对 0.62 / 0.60）；短期基本持平</li>
+            <li>比 TimeBraid-6.7B 好约 0.30</li>
+            <li>所有方法的输入相同：历史 + Macro + Micro</li>
+          </ul>
+        </div>
+      </div>
+      <div class="table-wrap" style="margin-top:18px">
+        <table>
+          <tr><th>方法</th><th>类别</th><th class="num">总分</th><th class="num">短期</th><th class="num">中期</th><th class="num">长期</th></tr>
+          <tr class="ours"><td><b>我们（E16，种子 0 / 1）</b></td><td>9B + Chronos-2</td><td class="num"><b>0.478 / 0.474</b></td><td class="num">0.401 / 0.395</td><td class="num">0.594 / 0.587</td><td class="num">0.539 / 0.541</td></tr>
+          <tr><td>MoiraiAgent (GPT-5.6 Sol)</td><td>智能体</td><td class="num">0.497</td><td class="num">0.398</td><td class="num">0.623</td><td class="num">0.603</td></tr>
+          <tr><td>GPT-5.6 Sol</td><td>大模型</td><td class="num">0.565</td><td class="num">0.417</td><td class="num">0.727</td><td class="num">0.782</td></tr>
+          <tr><td>tabSutra-39M + 规则</td><td>时序模型 + 规则</td><td class="num">0.627</td><td class="num">0.538</td><td class="num">0.719</td><td class="num">0.729</td></tr>
+          <tr><td>TimeBraid-6.7B</td><td>时序语言模型</td><td class="num">0.773</td><td class="num">0.685</td><td class="num">0.872</td><td class="num">0.864</td></tr>
+          <tr><td>Claude Opus 4.8</td><td>大模型</td><td class="num">0.781</td><td class="num">0.538</td><td class="num">1.077</td><td class="num">1.147</td></tr>
+          <tr><td>Chronos-2（只看历史）</td><td>时序模型</td><td class="num">0.795</td><td class="num">0.764</td><td class="num">0.803</td><td class="num">0.848</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- CiK -->
+    <div class="tabpanel" id="t-cik">
+      <div class="cards c2">
+        <div class="card"><h4 style="color:var(--text)">官方 RCRPS（越低越好）</h4><div class="bars" id="cik-bars"></div></div>
+        <div class="card">
+          <h4 style="color:var(--text)">要点</h4>
+          <ul class="tight muted">
+            <li>0.153 / 0.157（两个种子），接近 GPT-5.4 直接提示（0.145）</li>
+            <li>好于 GPT-4o 直接提示（0.191），比 TimeBraid 好约 0.13</li>
+            <li>只用 9B 语言模型；前沿大模型的剩余优势主要在需要常识和类比的题上</li>
+          </ul>
+          <h4 style="color:var(--text);margin-top:16px">方法演进</h4>
+          <div class="table-wrap" style="margin:0">
+            <table>
+              <tr><th>版本</th><th class="num">RCRPS</th></tr>
+              <tr><td>27B 改写 + 9B 提取；第二阶段 E14</td><td class="num">0.255</td></tr>
+              <tr><td>一步式 9B（蒸馏）；E15</td><td class="num">0.190</td></tr>
+              <tr class="ours"><td>+ 外部输入、参考序列、历史屏蔽；E16</td><td class="num"><b>0.153–0.157</b></td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+      <p class="note" style="margin-top:14px">基线来源：TimeBraid 论文与 Context-is-Key 榜单。GPT-4o 取榜单数值（TimeBraid 论文中为 0.257）。</p>
+    </div>
+
+    <!-- Stage 2 value -->
+    <div class="tabpanel" id="t-s2">
+      <div class="cards c2">
+        <div class="card">
+          <h4 style="color:var(--text)">GIFT-Eval-CTX：同样的效应信息</h4>
+          <div class="table-wrap" style="margin:0">
+            <table>
+              <tr><th>做法</th><th class="num">总分</th></tr>
+              <tr><td>只看历史</td><td class="num">0.795</td></tr>
+              <tr><td>只用规则（代码执行约束）</td><td class="num">0.634</td></tr>
+              <tr><td>只用第二阶段模型（不投影）</td><td class="num">0.542–0.554</td></tr>
+              <tr class="ours"><td><b>混合：第二阶段 + 安全投影</b></td><td class="num"><b>0.474–0.478</b></td></tr>
+            </table>
+          </div>
+          <p class="note">只用规则只能执行约束；趋势、形状、只给极值的偏移都需要模型从历史中补全。</p>
+        </div>
+        <div class="card">
+          <h4 style="color:var(--text)">GIFT-Eval-CTX：去掉某类信息（种子 0 / 1）</h4>
+          <div class="table-wrap" style="margin:0">
+            <table>
+              <tr><th>设置</th><th class="num">总分</th></tr>
+              <tr class="ours"><td>全部信息</td><td class="num">0.478 / 0.474</td></tr>
+              <tr><td>去掉季节幅度、反复偏移、季节性</td><td class="num">0.486 / 0.482</td></tr>
+              <tr><td>去掉趋势</td><td class="num">0.493 / 0.494</td></tr>
+              <tr><td>去掉全程水平范围</td><td class="num">0.547 / 0.537</td></tr>
+              <tr><td>只用 Micro</td><td class="num">0.560 / 0.559</td></tr>
+              <tr><td>只用 Macro</td><td class="num">0.629 / 0.622</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:18px">
+        <h4 style="color:var(--text)">Context-is-Key：输入相同且正确时，外部输入交给谁（RCRPS）</h4>
+        <div class="table-wrap" style="margin:0">
+          <table>
+            <tr><th>任务</th><th class="num">只看历史</th><th class="num">原版 Chronos-2 + 输入</th><th class="num">第二阶段 + 输入（种子 0 / 1）</th></tr>
+            <tr><td>因果方程（隐含 / 最少信息）</td><td class="num">0.318</td><td class="num">0.180</td><td class="num"><b>0.109 / 0.132</b></td></tr>
+            <tr><td>风扇转速</td><td class="num">0.460</td><td class="num">0.427</td><td class="num"><b>0.316 / 0.311</b></td></tr>
+            <tr><td>风扇压力（只说“亲和定律”）</td><td class="num">0.656</td><td class="num">0.420</td><td class="num"><b>0.290 / 0.370</b></td></tr>
+            <tr><td>风扇压力（明确说平方关系）</td><td class="num">0.656</td><td class="num"><b>0.289</b></td><td class="num">0.265 / 0.330</td></tr>
+          </table>
+        </div>
+        <p class="note">端到端（用第一阶段实际读出的结果）：规则 0.165 → 混合 0.153 / 0.157。另做了一组对照：把读出的数值去掉、只保留方向时，第二阶段在 ATM 停用、交通量下降、传感器维护三类任务上把误差降低了 20%–35%，而规则在这种情况下无能为力。</p>
+      </div>
+    </div>
+
+    <!-- Stage 1 accuracy -->
+    <div class="tabpanel" id="t-s1">
+      <div class="card">
+        <h4 style="color:var(--text)">Context-is-Key 中有标准答案的 60 道题；端到端使用同一个第二阶段</h4>
+        <div class="table-wrap" style="margin:0">
+          <table>
+            <tr><th>第一阶段</th><th class="num">找到</th><th class="num">时间对</th><th class="num">整段全对</th><th class="num">找不到依据的数值</th><th class="num">端到端 RCRPS</th></tr>
+            <tr><td>原版 9B 直接输出 JSON</td><td class="num">65%</td><td class="num">55%</td><td class="num">50%</td><td class="num">2%</td><td class="num">0.261</td></tr>
+            <tr><td>27B 直接输出 JSON</td><td class="num">92%</td><td class="num">75%</td><td class="num">72%</td><td class="num">0</td><td class="num">0.194</td></tr>
+            <tr class="ours"><td><b>9B 照抄 + 代码换算</b></td><td class="num"><b>100%</b></td><td class="num"><b>100%</b></td><td class="num"><b>98%</b></td><td class="num">0（核对拦下 1 行）</td><td class="num"><b>0.190</b></td></tr>
+          </table>
+        </div>
+        <p class="note">直接输出几乎不编造数值，主要问题是漏读和时间换算错误。照抄加代码换算消除了这两类错误，让 9B 达到并略超 27B 直接输出的水平。表中是外部输入功能加入之前的版本。</p>
+      </div>
+    </div>
+
+    <!-- Safety & robustness -->
+    <div class="tabpanel" id="t-safe">
+      <div class="cards c2">
+        <div class="card">
+          <h4 style="color:var(--text)">安全投影的实证检验</h4>
+          <div class="table-wrap" style="margin:0">
+            <table>
+              <tr><th>检验</th><th class="num">违反</th></tr>
+              <tr><td>GIFT-Eval-CTX，225 万个预测步（94.6% 的约束为真）：真约束下误差变大</td><td class="num"><b>0</b></td></tr>
+              <tr><td>同上：假约束下超出定理 2 的上界</td><td class="num"><b>0</b></td></tr>
+              <tr><td>Context-is-Key，逐步 CRPS：区间约束、真实值在区间内时变大</td><td class="num"><b>0</b> / 240</td></tr>
+              <tr><td>同上：精确值超出命题 3 的上界</td><td class="num"><b>0</b> / 765</td></tr>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <h4 style="color:var(--text)">稳健性核查</h4>
+          <details><summary>训练数据的部分规则参数曾在 3,000 道测试题上调过</summary><div class="body">只看另外 7,000 道没参与调参的题：我们 0.480 / 0.478，MoiraiAgent 0.501，领先依然成立。</div></details>
+          <details><summary>趋势判断阈值是否对着测试标注优化过</summary><div class="body">不是。只用 3,000 道题重新搜索，一致率最高的取值（0.15, 0.6）与现值（0.06, 0.5）不同；现值的一致率在两组题上相同（0.589 / 0.595）。</div></details>
+          <details><summary>微调是否损害只看历史的能力</summary><div class="body">GIFT-Eval-CTX：0.787，原版 0.795，没有退化。Context-is-Key：0.295–0.303，原版 0.290，轻微退化；推理时没有陈述的步改用原版来规避。</div></details>
+          <details><summary>“上下界约束”任务的大幅提升是否碰巧</summary><div class="body">逐题核对，5 道题都是正确读出约束（旧版第一阶段只读对 1 道）。</div></details>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LIMITS ============ -->
+<section id="limits">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="num">05 / 局限与下一步</div>
+      <div>
+        <h2>还需要解决的问题</h2>
+        <p>以下几点在投稿前需要补上实验或在论文中如实说明。</p>
+      </div>
+    </div>
+    <div class="cards c3 reveal">
+      <div class="card"><h4>“看过测试题”</h4><p class="muted">第一阶段的若干修正和外部输入的训练模板，是看过 Context-is-Key 的题型后设计的；第二阶段版本也是按测试成绩选的。需要一个独立的文本测试集来检验。</p></div>
+      <div class="card"><h4>适用范围</h4><p class="muted">常识和类比类的题（约占 Context-is-Key 权重的 14%）不在方法范围内，例如“新区靠近河流，参照其他区估计救援次数”。前沿大模型的优势主要在这里。</p></div>
+      <div class="card"><h4>第二阶段在文本基准上的贡献偏小</h4><p class="muted">Context-is-Key 上约 0.01，比 GIFT-Eval-CTX 上（0.634 → 0.476）小得多：文本中的效应多数带明确数值，代码直接写入就够了。</p></div>
+    </div>
+    <div class="sub reveal"><h3>下一步</h3></div>
+    <div class="table-wrap reveal">
+      <table>
+        <tr><th>事项</th><th>目的</th><th>状态</th></tr>
+        <tr><td>第一阶段第四轮训练</td><td class="muted">修正 ATM 停用、假日交通等题上的退步</td><td><span class="pill amber">进行中</span></td></tr>
+        <tr><td>换 TimesFM 底座</td><td class="muted">证明效应语言和训练方法不依赖 Chronos-2</td><td><span class="pill violet">计划</span></td></tr>
+        <tr><td>把 GIFT-Eval-CTX 的结构化效应改写成自然文本</td><td class="muted">得到独立、大规模的“文本 → 预测”测试集</td><td><span class="pill violet">计划</span></td></tr>
+        <tr><td>消融实验</td><td class="muted">第二阶段训练数据的各个成分、数据规模曲线；照抄 vs 直接计算</td><td><span class="pill violet">计划</span></td></tr>
+        <tr><td>GIFT-Eval-CTX 榜单提交</td><td class="muted">第三方认可的成绩</td><td><span class="pill violet">待定</span></td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <b style="color:var(--text)">进展汇报</b> · 2026-11-26<br>
+      数字均为当前版本；“两个种子”指第二阶段的两次独立训练。
+    </div>
+    <div>
+      引用：GIFT-Eval-CTX（Salesforce）· Context-is-Key（ServiceNow）· Chronos-2（Amazon）· Qwen3.5 · TimeBraid · MoiraiAgent<br>
+      源码：<a href="https://github.com/CaesarrWANG/tsfm_ctx">github.com/CaesarrWANG/tsfm_ctx</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const BARS = {
+  gift: [["我们（9B + Chronos-2）",0.476,1],["MoiraiAgent (GPT-5.6)",0.497],["GPT-5.6 Sol",0.565],["tabSutra-39M + 规则",0.627],["TimeBraid-6.7B",0.773],["Claude Opus 4.8",0.781],["Chronos-2（只看历史）",0.795]],
+  cik: [["Gemini-2.5-Flash 直接提示",0.110],["Llama-3.1-405B 直接提示",0.143],["GPT-5.4 直接提示",0.145],["我们（9B + Chronos-2）",0.155,1],["GPT-4o 直接提示",0.191],["DeepSeek-Chat 直接提示",0.225],["TimeBraid-2.5B",0.289],["Chronos-2（只看历史）",0.290],["TimeBraid-6.7B",0.294]]
+};
+function drawBars(id, rows, max, axis){
+  const el = document.getElementById(id); if(!el) return;
+  el.innerHTML = rows.map(([n,v,o]) => `<div class="bar${o?' ours':''}"><div class="lab">${n}</div><div class="track"><div class="fill" style="width:${(v/max*100).toFixed(1)}%"></div></div><div class="val">${v.toFixed(3)}</div></div>`).join("") + `<div class="axis">${axis}</div>`;
+}
+drawBars("hero-bars", BARS.gift, 0.82, "相对季节性朴素预测的 MASE · 几何平均");
+drawBars("gift-bars", BARS.gift, 0.82, "相对季节性朴素预测的 MASE · 几何平均");
+drawBars("cik-bars", BARS.cik, 0.31, "官方 RCRPS");
+
+document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".tabs button").forEach(x => x.classList.toggle("active", x === b));
+  document.querySelectorAll(".tabpanel").forEach(p => p.classList.toggle("active", p.id === b.dataset.tab));
+}));
+
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), {rootMargin: "0px 0px -40px 0px"});
+document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+
+const links = [...document.querySelectorAll("nav li a")];
+const secs = links.map(a => document.querySelector(a.getAttribute("href")));
+addEventListener("scroll", () => {
+  let cur = 0; secs.forEach((s, i) => { if (s && s.getBoundingClientRect().top < 120) cur = i; });
+  links.forEach((a, i) => a.classList.toggle("active", i === cur && scrollY > 200));
+}, {passive: true});
+</script>
+</body>
+</html>

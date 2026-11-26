@@ -255,6 +255,45 @@ table.pw td.res.drop{color:#f87171}
 .pw-out{font-size:14px;color:var(--text)}
 .pw-out b{color:#5eead4}
 @media(max-width:820px){.pw-stage{grid-template-columns:1fr}}
+
+.pv{--time:#60a5fa;--num:#fbbf24;--type:#34d399;--dir:#f472b6}
+.pv-leg{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--muted);margin:0 0 14px}
+.pv-leg span{display:inline-flex;align-items:center;gap:6px}
+.pv-leg i{display:inline-block;width:12px;height:12px;border-radius:3px}
+.pv-text{font-size:15px;line-height:2.05;color:#c9cfdb;background:#0d1017;border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+.pv-text .sp{border-radius:5px;padding:2px 4px;color:#0b0d12;font-weight:600}
+.pv-text .sp.u{background:none!important;color:inherit;font-weight:500;border-bottom:2px dashed;border-radius:0;padding:0 1px}
+.pv-text sup{font-size:10px;font-weight:700;margin-left:2px;color:inherit;opacity:.8}
+.pv-step{display:flex;align-items:center;gap:10px;margin:12px 0 10px;font-size:13px;color:var(--muted)}
+.pv-step .ar{font-size:18px;color:#4b5568}
+.pv-line{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:14px 16px;margin-bottom:12px}
+.pv-line.skip{opacity:.8}
+.pv-line.drop{border-color:rgba(239,68,68,.5)}
+.pv-lh{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:13px;color:var(--muted)}
+.pv-lh .no{font-family:var(--mono);font-weight:700;color:var(--text);background:#232a39;border-radius:999px;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;font-size:12px}
+.pv-chips{display:flex;flex-wrap:wrap;gap:8px}
+.pv-chip{display:inline-flex;flex-direction:column;border-radius:10px;padding:5px 10px;background:#0d1017;border:1px solid var(--line)}
+.pv-chip i{font-style:normal;font-size:11px;color:var(--muted)}
+.pv-chip b{font-size:13.5px;font-weight:600;color:var(--text);font-family:var(--mono)}
+.pv-chip.copy b{color:#0b0d12;border-radius:4px;padding:0 4px;margin-top:2px}
+.pv-chip.bad{border-color:#ef4444}
+.pv-calc{margin:12px 0 4px;font-size:13.5px;color:#d6dbe6}
+.pv-calc .who{margin-right:8px}
+.pv-axis{position:relative;margin:30px 0 34px}
+.pv-cells{display:flex;gap:1px;height:22px}
+.pv-cells div{flex:1;background:#232a39;border-radius:2px}
+.pv-cells div.h{background:#1a1f2a}
+.pv-orig{position:absolute;top:-6px;bottom:-6px;border-left:2px dashed #94a3b8}
+.pv-orig span{position:absolute;top:-20px;left:-4px;transform:translateX(-100%);white-space:nowrap;font-size:11.5px;color:#cbd5e1}
+.pv-tick{position:absolute;top:28px;font-size:11px;color:var(--muted);transform:translateX(-50%);white-space:nowrap;text-align:center;line-height:1.3}
+.pv-mlab{position:absolute;top:-22px;font-size:12px;font-weight:600;white-space:nowrap;transform:translateX(-50%)}
+.pv-past{position:absolute;left:0;top:-44px;font-size:12px;color:#f9a8d4;white-space:nowrap}
+.pv-res{display:inline-block;font-size:13.5px;font-weight:600;padding:4px 12px;border-radius:999px}
+.pv-res.ok{background:rgba(94,234,212,.14);color:#5eead4}
+.pv-res.skip{background:rgba(148,163,184,.14);color:#cbd5e1}
+.pv-res.drop{background:rgba(239,68,68,.16);color:#fca5a5}
+.pv details{margin-top:10px;font-size:13px;color:var(--muted)}
+.pv details pre{font-family:var(--mono);font-size:12px;white-space:pre-wrap;word-break:break-word;background:#0d1017;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:#c9cfdb;margin:8px 0 0}
 </style>
 </head>
 <body>
@@ -545,33 +584,10 @@ F′ = Π<sub>𝒞</sub>(F)           <span style="color:#9aa3b5"># 安全投影
         </div>
       </div>
     </div>
-    <p class="reveal muted" style="margin:0 0 14px">三个例子，从左到右：原文中的<mark>高亮</mark>是解析器照抄的片段 → 解析器输出的字段（黄色框为照抄原文） → 编译器算出的结果。</p>
-    <div class="pflow reveal">
-      <div class="col"><div class="hd">原文</div><span class="ptype" style="background:#5eead422;color:#5eead4;border:1px solid #5eead466">效应：平时的倍数</span><div class="src">…a heat wave in city A from <mark>2013-05-28 12:00:00</mark> for <mark>2 hours</mark>, leading to … and <mark>4</mark> times the usual electricity being consumed.</div></div>
-      <div class="arrow">→</div>
-      <div class="col model"><div class="hd">解析器指出（9B，只照抄、不计算）</div><div class="chips"><span class="chip"><i>类型</i><b>平时的倍数</b></span><span class="chip copy"><i>时间</i><b>from 2013-05-28 12:00 for 2 hours</b></span><span class="chip copy"><i>数值</i><b>4</b></span><span class="chip"><i>方向</i><b>上升</b></span><span class="chip"><i>可信度</i><b>已确认</b></span></div></div>
-      <div class="arrow">→</div>
-      <div class="col code"><div class="hd">编译器计算（确定性程序）</div><div class="res">预测<b>第 9–10 步</b>（12:00–13:00）<br>= 各自的平时水平 × 4 = <b>2199、1951</b><br><span class='muted' style='font-size:13px'>写为精确值，作硬约束执行</span></div></div>
-    </div>
-    <div class="pflow reveal">
-      <div class="col"><div class="hd">原文</div><span class="ptype" style="background:#818cf822;color:#818cf8;border:1px solid #818cf866">外部输入时间表</span><div class="src">The load is set to: … <mark>0.2</mark> <mark>from 05:48:01 until 05:48:27</mark>, 0.1 from 05:48:27 until 05:48:49, …</div></div>
-      <div class="arrow">→</div>
-      <div class="col model"><div class="hd">解析器指出（9B，只照抄、不计算）</div><div class="chips"><span class="chip"><i>类型</i><b>外部输入</b></span><span class="chip"><i>名称</i><b>load</b></span><span class="chip copy"><i>时间</i><b>from 05:48:01 until 05:48:27</b></span><span class="chip copy"><i>数值</i><b>0.2</b></span></div></div>
-      <div class="arrow">→</div>
-      <div class="col code"><div class="hd">编译器计算（确定性程序）</div><div class="res">输入序列在 05:48:01–05:48:27 这些步<b>= 0.2</b><br><span class='muted' style='font-size:13px'>各段拼成历史加未来的逐步输入，交给预测器学习它与目标的关系</span></div></div>
-    </div>
-    <div class="pflow reveal">
-      <div class="col"><div class="hd">原文</div><span class="ptype" style="background:#f8717122;color:#f87171;border:1px solid #f8717166">历史屏蔽</span><div class="src">The ATM was under maintenance for <mark>7 days</mark>, periodically <mark>every 15 days</mark>, <mark>starting from 1996-08-12</mark>. Assume that the ATM will not be in maintenance in the future.</div></div>
-      <div class="arrow">→</div>
-      <div class="col model"><div class="hd">解析器指出（9B，只照抄、不计算）</div><div class="chips"><span class="chip"><i>类型</i><b>历史屏蔽</b></span><span class="chip copy"><i>起点</i><b>starting from 1996-08-12</b></span><span class="chip copy"><i>持续</i><b>7 days</b></span><span class="chip copy"><i>重复</i><b>every 15 days</b></span></div></div>
-      <div class="arrow">→</div>
-      <div class="col code"><div class="hd">编译器计算（确定性程序）</div><div class="res">历史中<b>每 15 天里的 7 天</b>标为缺失<br><span class='muted' style='font-size:13px'>预测器不会把维护期的“零取款”当成正常规律学进去</span></div></div>
-    </div>
-    <p class="note reveal">实际输出是每行用“|”分隔的字段（例如 <code>electricity | multiple of usual | fromfor | from 2013-05-28 12:00 for 2 hours | 4 | up | sustained | confirmed | no</code>）；上图把同样的字段逐项展开。更多例子及编译出的逐步序列见 3.7。</p>
-
-    <div class="reveal" style="margin:30px 0 10px">
-      <h4 style="color:var(--text)">解析器的工作过程（逐步）</h4>
-      <p class="muted" style="max-width:920px;font-size:14.5px">上面三行是结果；下面拆开看每一步是谁做的、做了什么。只有第 ② 步是模型，其余都是代码：模型只负责<b style="color:var(--text)">读懂原文、指出相关片段</b>，换算成第几步、多少数值由代码完成，模型照抄的片段在原文中找不到就丢弃。例子与 3.4 相同，均为 Context-is-Key 的真实题目和第四轮解析器的实际输出。</p>
+    <div class="pv reveal" style="margin-top:8px">
+      <h4 style="color:var(--text)">解析器怎样工作：一个例子看懂</h4>
+      <p class="muted" style="max-width:920px;font-size:14.5px">颜色把三层连在一起：原文中的片段 → 解析器写出的字段 → 代码换算出的预测步。<b style="color:var(--text)">实心色块</b>是解析器照抄的原文（时间、数字），<b style="color:var(--text)">虚线下划线</b>是解析器读懂后选择的含义（类型、方向），不照抄。照抄的片段在原文中找不到，这一行就被丢弃。</p>
+      <div class="pv-leg"><span><i style="background:var(--time)"></i>时间（照抄）</span><span><i style="background:var(--num)"></i>数字（照抄）</span><span><i style="background:var(--type)"></i>类型（理解）</span><span><i style="background:var(--dir)"></i>方向（理解）</span></div>
       <div class="tabs" id="pw-tabs"></div>
       <div id="pw-body"></div>
     </div>
@@ -1090,29 +1106,51 @@ function drawCM(k){
   drawCM(0); })();
 
 
-const PW = [{"tab": "精确倍数（用电量）", "head": "Monitored quantity: not named here - it is the quantity the text is about. Start with a line \"NAME: <short name>\".\nForecast origin: 2013-05-28 03:00 (Tuesday). Hourly data, horizon 24 steps.", "body": "This is the electricity consumption recorded in Kilowatt (kW) in city A. Suppose that there is a heat wave in city A <mark>from 2013-05-28 12:00 for 2 hours</mark>, leading to excessive use of air conditioning, and <mark>4</mark> times the usual electricity being consumed. A brief technical issue in the electricity grid caused a major dip of <mark>75</mark>% in electricity consumption <mark>2 weeks ago</mark>. This issue is not expected to happen again this week.", "answer": "NAME: electricity consumption\nelectricity consumption | multiple of usual | fromfor | from 2013-05-28 12:00 for 2 hours | 4 | - | sustained | confirmed | no\nelectricity consumption | change by percent | past | 2 weeks ago | 75 | down | sustained | confirmed | no", "rows": [["NAME 行", "—", "—", "—", "给监测量命名，用来区分“关于目标的陈述”和“关于其他量的陈述”", "ok"], ["第 1 行", "时间 “from 2013-05-28 12:00 for 2 hours” ✓<br>数字 “4” ✓", "起点 03:00、每小时一步：12:00 是第 9 步；“for 2 hours” = 2 步 → <b>第 9–10 步</b>", "类型“平时的倍数”，4 → 记为 ln 4 = 1.386；倍数大于 1，方向记为 ↑", "采用", "ok"], ["第 2 行", "时间 “2 weeks ago” ✓<br>数字 “75” ✓", "关系 past：两周前，在预测起点之前 → 不在预测期内", "—", "不进入预测（是历史上的事件，原文也说本周不会再发生）", "skip"]], "out": "第 9–10 步 · 平时的倍数 = 4 · 方向 ↑ · 已确认"}, {"tab": "只给方向（节假日）", "head": "Monitored quantity: not named here - it is the quantity the text is about. Start with a line \"NAME: <short name>\".\nForecast origin: 2024-07-03 23:00 (Wednesday). Hourly data, horizon 72 steps.", "body": "This series contains the road occupancy rates on a freeway in the San Francisco Bay area. Note that <mark>2024-07-04</mark> is a holiday due to Independence Day. Note that traffic on this freeway typically reduces on holidays.", "answer": "NAME: road occupancy rates\nroad occupancy rates | direction only | on | 2024-07-04 | - | down slight | sustained | confirmed | no", "rows": [["NAME 行", "—", "—", "—", "监测量 = road occupancy rates", "ok"], ["第 1 行", "时间 “2024-07-04” ✓<br>无数字（写 -）", "关系 on：7 月 4 日全天 00:00–23:00；起点 7 月 3 日 23:00、每小时一步 → <b>第 1–24 步</b>", "类型“只给方向”：方向 down，幅度词 slight", "采用", "ok"]], "out": "第 1–24 步 · 只给方向 ↓ · 不写数值 · 已确认"}, {"tab": "外部输入（因果方程）", "head": "Monitored quantity: not named here - it is the quantity the text is about. Start with a line \"NAME: <short name>\".\nForecast origin: 2024-04-03 00:00 (Wednesday). Daily data, horizon 32 steps.", "body": "Given are variables X_0 and X_1, where X_0 is a covariate and X_1 is the variable to forecast. Variables are generated from a linear Structural Vector Autoregressive (SVAR) model with additive gauss noise and a noise scale of 5.533e-04, with lag = 3. The task is to forecast the value of the variable X_1 at time t, given the values of the covariate X_0 and the variable X_1 itself at times t-1, ... t-3. For the first 128 days, the covariate X_0 takes a value of <mark>0.0443</mark> <mark>from 2023-11-28 to 2024-01-13</mark>, <mark>0.1107</mark> <mark>from 2024-01-14 to 2024-02-29</mark>, 0.0443 <mark>from 2024-03-01 to 2024-04-03</mark>. For the next 32 days, the covariate X_0 takes a value of <mark>0.0553</mark> <mark>from 2024-04-04 to 2024-04-19</mark>, 0.1107 <mark>from 2024-04-20 to 2024-04-21</mark>, <mark>0.1328</mark> <mark>from 2024-04-22 to 2024-05-05</mark>. Each day can be treated as a timestep for the forecasting task. The causal parents affect the child variables at different lags. The mathematical equations describing the cause-effect relationship for each variable is given below: X_0^{t} = \\epsilon_0^{t} X_1^{t} = -0.925 * X_0^{t-1} + 1.223 * X_1^{t-1} + -0.990 * X_0^{t-2} + -1.181 * X_1^{t-2} + -0.720 * X_0^{t-3} + 0.751 * X_1^{t-3} + \\epsilon_1^{t} \\epsilon_{i}^{t} given in the equations corresponds to the noise variable with the given noise scale, for X_i^{t}.", "answer": "NAME: X_1\ninput | X_0 | from 2023-11-28 to 2024-01-13 | 0.0443\ninput | X_0 | from 2024-01-14 to 2024-02-29 | 0.1107\ninput | X_0 | from 2024-03-01 to 2024-04-03 | 0.0443\ninput | X_0 | from 2024-04-04 to 2024-04-19 | 0.0553\ninput | X_0 | from 2024-04-20 to 2024-04-21 | 0.1107\ninput | X_0 | from 2024-04-22 to 2024-05-05 | 0.1328", "rows": [["NAME 行", "—", "—", "—", "监测量 = X_1（要预测的变量）", "ok"], ["第 1–3 行", "6 个时间段、6 个数字均在原文中 ✓", "起点 2024-04-03、每天一步 → 都在历史段（11 月 28 日至 4 月 3 日）", "X_0 = 0.0443 / 0.1107 / 0.0443", "采用：填入输入序列的历史部分", "ok"], ["第 4–6 行", "同上 ✓", "4 月 4 日是第 1 步 → <b>第 1–16、17–18、19–32 步</b>", "X_0 = 0.0553 / 0.1107 / 0.1328", "采用：填入输入序列的未来部分", "ok"]], "out": "外部输入 X_0：历史 + 未来逐日取值（160 步）；目标与 X_0 的系数不由解析器给出"}, {"tab": "被丢弃的一行", "head": "Monitored quantity: not named here - …\nForecast origin: 2022-11-19 11:40 (Saturday). Every 600 seconds data, horizon 73 steps.", "body": "This series contains the amount of sunlight (in Watts per squared meter) arriving on a horizontal surface, for a location in Florida, United States. Over the previous 90 days, the maximum sunlight happened <mark>on average at 12:25:33</mark>.", "answer": "NAME: sunlight\ninput | maximum sunlight | on average at 12:25:33 | 12:25:33", "rows": [["NAME 行", "—", "—", "—", "监测量 = sunlight", "ok"], ["第 1 行", "时间 “on average at 12:25:33” ✓<br>数值 “12:25:33” ✗ 既不是数字也不是状态词", "—", "—", "<b>丢弃</b>：模型把“最大日照的平均时刻”误当成输入时间表，代码核对不通过", "drop"]], "out": "没有可用的效应：这道题按原版 Chronos-2 只看历史预测"}];
-const PW_INSTR = "List every statement in the text about a monitored quantity, one per line, in this form:\nquantity | type | relation | time expression | number | direction | pace | reliability | repeats\n- type: level, change by amount, change by percent, multiple of usual, upper limit, lower limit, volatility factor, direction only\n- relation: between, from, until, before, after, on, next, startin, by, past, fromfor; write - as the time expression when the statement covers the whole forecast period\n- time expression and number: copy them from the text character for character; never compute or convert. Copy a range as written (15-20). Use - when the statement has no number; write zero when the text says there is none of it (no withdrawals, no readings).\n- direction: up, down or - ; for 'direction only' statements add the size: slight, moderate or strong\n- pace: sustained, gradual or brief; reliability: confirmed or rumour; repeats: yes or no\nLeave out statements about other quantities. If there is nothing, answer NONE.\nAlso list every stated schedule of an input that drives the monitored quantity (a setting, a control, a covariate), over the history or the forecast period, one value per line: input | name of the input | time expression | number. Copy the time expression and the number character for character; write - as the time expression for a starting value that has no time. If the text says the monitored quantity follows the square of the input, add the line: relation | name of the input | square. A list of (time, value) readings of a related series counts as such a schedule; a state (clear, cloudy, open, closed) is copied as the value. For a past period when the monitored quantity was abnormal (maintenance, outage, glitch) and that the text says will not happen in the future, write: exclude | time expression | duration | repeat, copying each part, or - when not stated.";
-function drawPW(k){
-  const d = PW[k];
+const PV = [{"tab": "用电量：精确倍数", "text": ["This is the electricity consumption recorded in Kilowatt (kW) in city A. Suppose that there is a heat wave in city A ", {"t": "from 2013-05-28 12:00 for 2 hours", "r": "time", "n": 1}, ", leading to excessive use of air conditioning, and ", {"t": "4", "r": "num", "n": 1}, " ", {"t": "times the usual", "r": "type", "n": 1}, " electricity being consumed. A brief technical issue in the electricity grid caused a major ", {"t": "dip", "r": "dir", "n": 2}, " of ", {"t": "75", "r": "num", "n": 2}, "% in electricity consumption ", {"t": "2 weeks ago", "r": "time", "n": 2}, ". This issue is not expected to happen again this week."], "axis": {"hist": 4, "H": 24, "origin": "预测起点 03:00", "ticks": [[0, "00:00"], [4, "04:00<br>第 1 步"], [12, "12:00<br>第 9 步"], [27, "次日 03:00<br>第 24 步"]]}, "lines": [{"chips": [{"k": "类型", "v": "平时的倍数", "r": "type", "copy": false, "bad": false}, {"k": "时间", "v": "from 2013-05-28 12:00 for 2 hours", "r": "time", "copy": true, "bad": false}, {"k": "数值", "v": "4", "r": "num", "copy": true, "bad": false}, {"k": "可信度", "v": "已确认", "r": null, "copy": false, "bad": false}], "calc": "12:00 − 起点 03:00 = 9 小时 → <b>第 9 步</b>；for 2 hours → 2 步", "mark": [12, 13, "第 9–10 步 · 平时 × 4"], "result": "采用：第 9–10 步 = 平时的 4 倍（↑）", "st": "ok"}, {"chips": [{"k": "类型", "v": "按百分比变化", "r": "type", "copy": false, "bad": false}, {"k": "时间", "v": "2 weeks ago", "r": "time", "copy": true, "bad": false}, {"k": "数值", "v": "75", "r": "num", "copy": true, "bad": false}, {"k": "方向", "v": "down", "r": "dir", "copy": false, "bad": false}], "calc": "“2 weeks ago” 在预测起点之前，不落在预测期内", "mark": null, "past": "← 两周前（在起点之前很远）", "result": "不进入预测：这是历史上的事件", "st": "skip"}], "raw": ["Monitored quantity: not named here - it is the quantity the text is about. Start with a line \"NAME: <short name>\".\nForecast origin: 2013-05-28 03:00 (Tuesday). Hourly data, horizon 24 steps.\n\nText:\nThis is the electricity consumption recorded in Kilowatt (kW) in city A. Suppose that there is a heat wave in city A from 2013-05-28 12:00 for 2 hours, leading to excessive use of air conditioning, and 4 times the usual electricity being consumed. A brief technical issue in the electricity grid caused a major dip of 75% in electricity consumption 2 weeks ago. This issue is not expected to happen again this week.", "NAME: electricity consumption\nelectricity consumption | multiple of usual | fromfor | from 2013-05-28 12:00 for 2 hours | 4 | - | sustained | confirmed | no\nelectricity consumption | change by percent | past | 2 weeks ago | 75 | down | sustained | confirmed | no"]}, {"tab": "节假日：只给方向", "text": ["This series contains the road occupancy rates on a freeway in the San Francisco Bay area. Note that ", {"t": "2024-07-04", "r": "time", "n": 1}, " is a holiday due to Independence Day. Note that traffic on this freeway typically ", {"t": "reduces", "r": "dir", "n": 1}, " on holidays."], "axis": {"hist": 6, "H": 72, "origin": "预测起点 7/3 23:00", "ticks": [[6, "7/4 00:00<br>第 1 步"], [30, "7/5 00:00<br>第 25 步"], [54, "7/6 00:00"], [77, "7/6 23:00<br>第 72 步"]]}, "lines": [{"chips": [{"k": "类型", "v": "只给方向", "r": "type", "copy": false, "bad": false}, {"k": "时间", "v": "2024-07-04", "r": "time", "copy": true, "bad": false}, {"k": "数值", "v": "无", "r": null, "copy": false, "bad": false}, {"k": "方向", "v": "down（slight）", "r": "dir", "copy": false, "bad": false}, {"k": "可信度", "v": "已确认", "r": null, "copy": false, "bad": false}], "calc": "“on 2024-07-04” = 7/4 全天 00:00–23:00 → <b>第 1–24 步</b>", "mark": [6, 29, "第 1–24 步 · ↓ 下降（降多少由预测器推断）"], "result": "采用：第 1–24 步方向 ↓，不写数值", "st": "ok"}], "raw": ["Monitored quantity: not named here - it is the quantity the text is about. Start with a line \"NAME: <short name>\".\nForecast origin: 2024-07-03 23:00 (Wednesday). Hourly data, horizon 72 steps.\n\nText:\nThis series contains the road occupancy rates on a freeway in the San Francisco Bay area. Note that 2024-07-04 is a holiday due to Independence Day. Note that traffic on this freeway typically reduces on holidays.", "NAME: road occupancy rates\nroad occupancy rates | direction only | on | 2024-07-04 | - | down slight | sustained | confirmed | no"]}, {"tab": "外部输入：时间表", "text": ["… For the first 128 days, the covariate X_0 takes a value of ", {"t": "0.0443", "r": "num", "n": 1}, " ", {"t": "from 2023-11-28 to 2024-01-13", "r": "time", "n": 1}, ", ", {"t": "0.1107", "r": "num", "n": 2}, " ", {"t": "from 2024-01-14 to 2024-02-29", "r": "time", "n": 2}, ", ", {"t": "0.0443", "r": "num", "n": 3}, " ", {"t": "from 2024-03-01 to 2024-04-03", "r": "time", "n": 3}, ". For the next 32 days, the covariate X_0 takes a value of ", {"t": "0.0553", "r": "num", "n": 4}, " ", {"t": "from 2024-04-04 to 2024-04-19", "r": "time", "n": 4}, ", ", {"t": "0.1107", "r": "num", "n": 5}, " ", {"t": "from 2024-04-20 to 2024-04-21", "r": "time", "n": 5}, ", ", {"t": "0.1328", "r": "num", "n": 6}, " ", {"t": "from 2024-04-22 to 2024-05-05", "r": "time", "n": 6}, ". Each day can be treated as a timestep … X_1^{t} = -0.925 * X_0^{t-1} + 1.223 * X_1^{t-1} + … "], "axis": {"hist": 128, "H": 32, "origin": "预测起点 4/3", "ticks": [[0, "11/28"], [47, "1/14"], [94, "3/1"], [128, "4/4<br>第 1 步"], [146, "4/22<br>第 19 步"], [159, "5/5<br>第 32 步"]]}, "lines": [{"chips": [{"k": "类型", "v": "外部输入", "r": "type", "copy": false, "bad": false}, {"k": "名称", "v": "X_0", "r": null, "copy": false, "bad": false}, {"k": "6 个时间段", "v": "from 2023-11-28 to 2024-01-13 …", "r": "time", "copy": true, "bad": false}, {"k": "6 个数值", "v": "0.0443 / 0.1107 / …", "r": "num", "copy": true, "bad": false}], "calc": "每天一步：前 3 段落在历史，后 3 段落在预测期<b>第 1–16、17–18、19–32 步</b>", "segs": [[0, 46, 0.0443], [47, 93, 0.1107], [94, 127, 0.0443], [128, 143, 0.0553], [144, 145, 0.1107], [146, 159, 0.1328]], "result": "采用：拼成一条覆盖历史和预测期的逐日输入序列；方程里的系数不抽取，由预测器从历史中估计", "st": "ok"}], "raw": ["Monitored quantity: not named here - it is the quantity the text is about. Start with a line \"NAME: <short name>\".\nForecast origin: 2024-04-03 00:00 (Wednesday). Daily data, horizon 32 steps.\n\nText:\nGiven are variables X_0 and X_1, where X_0 is a covariate and X_1 is the variable to forecast. Variables are generated from a linear Structural Vector Autoregressive (SVAR) model with additive gauss noise and a noise scale of 5.533e-04, with lag = 3. The task is to forecast the value of the variable X_1 at time t, given the values of the covariate X_0 and the variable X_1 itself at times t-1, ... t-3. For the first 128 days, the covariate X_0 takes a value of 0.0443 from 2023-11-28 to 2024-01-13, 0.1107 from 2024-01-14 to 2024-02-29, 0.0443 from 2024-03-01 to 2024-04-03. For the next 32 days, the covariate X_0 takes a value of 0.0553 from 2024-04-04 to 2024-04-19, 0.1107 from 2024-04-20 to 2024-04-21, 0.1328 from 2024-04-22 to 2024-05-05. Each day can be treated as a timestep for the forecasting task. The causal parents affect the child variables at different lags. The mathematical equations describing the cause-effect relationship for each variable is given below: X_0^{t} = \\epsilon_0^{t} X_1^{t} = -0.925 * X_0^{t-1} + 1.223 * X_1^{t-1} + -0.990 * X_0^{t-2} + -1.181 * X_1^{t-2} + -0.720 * X_0^{t-3} + 0.751 * X_1^{t-3} + \\epsilon_1^{t} \\epsilon_{i}^{t} given in the equations corresponds to the noise variable with the given noise scale, for X_i^{t}.", "NAME: X_1\ninput | X_0 | from 2023-11-28 to 2024-01-13 | 0.0443\ninput | X_0 | from 2024-01-14 to 2024-02-29 | 0.1107\ninput | X_0 | from 2024-03-01 to 2024-04-03 | 0.0443\ninput | X_0 | from 2024-04-04 to 2024-04-19 | 0.0553\ninput | X_0 | from 2024-04-20 to 2024-04-21 | 0.1107\ninput | X_0 | from 2024-04-22 to 2024-05-05 | 0.1328"]}, {"tab": "被丢弃的一行", "text": ["This series contains the amount of sunlight (in Watts per squared meter) arriving on a horizontal surface, for a location in Florida, United States. Over the previous 90 days, the maximum sunlight happened ", {"t": "on average at 12:25:33", "r": "time", "n": 1}, "."], "axis": null, "lines": [{"chips": [{"k": "类型", "v": "外部输入", "r": "type", "copy": false, "bad": false}, {"k": "名称", "v": "maximum sunlight", "r": null, "copy": false, "bad": false}, {"k": "时间", "v": "on average at 12:25:33", "r": "time", "copy": true, "bad": false}, {"k": "数值", "v": "12:25:33 ✗", "r": "num", "copy": true, "bad": true}], "calc": "核对：“12:25:33” 既不是数字也不是状态词 → 这不是输入时间表", "mark": null, "result": "丢弃：这道题没有可用的效应，按原版 Chronos-2 只看历史预测", "st": "drop"}], "raw": ["Forecast origin: 2022-11-19 11:40 (Saturday). Every 600 seconds data, horizon 73 steps.\n\nText:\nThis series contains the amount of sunlight (in Watts per squared meter) arriving on a horizontal surface, for a location in Florida, United States. Over the previous 90 days, the maximum sunlight happened on average at 12:25:33.", "NAME: sunlight\ninput | maximum sunlight | on average at 12:25:33 | 12:25:33"]}];
+function drawPV(k){
+  const d = PV[k];
   document.querySelectorAll("#pw-tabs button").forEach((b,i)=>b.classList.toggle("active", i===k));
   const esc = t => String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;");
-  const st = (n, title, who, desc, box) => '<div class="pw-stage"><div class="pw-badge"><div class="n">' + n + '</div><b>' + title + '</b><span class="who ' + (who==="模型"?"m":"c") + '">' + who + '</span>' + (desc ? '<div class="muted" style="font-size:12px;margin-top:6px;line-height:1.5">' + desc + '</div>' : '') + '</div><div class="pw-box">' + box + '</div></div>';
-  let h = "";
-  h += st("①", "拼接输入", "代码", "预测起点、频率、步数取自数据的时间戳",
-    '<pre><span class="meta">' + esc(d.head) + '</span>\n\nText:\n' + d.body + '</pre><details><summary>格式说明（所有题目相同，约 20 行）</summary><pre>' + esc(PW_INSTR) + '</pre></details>');
-  const lines = d.answer.split("\n");
-  h += st("②", "模型输出", "模型", "Qwen3.5-9B + LoRA，贪心解码；每条陈述一行，时间和数字照抄原文",
-    '<div class="pw-ans">' + lines.map((l,i) => '<div><i>' + (i===0 ? "NAME" : "第 " + i + " 行") + '</i>' + esc(l) + '</div>').join("") + '</div>');
-  h += st("③④", "核对与换算", "代码", "照抄检查：片段必须在原文中找到；时间用日历算术换成预测步",
-    '<table class="pw"><tr><th>行</th><th>照抄检查</th><th>时间 → 预测步</th><th>数值</th><th>结果</th></tr>' +
-    d.rows.map(r => '<tr class="' + r[5] + '"><td style="white-space:nowrap">' + r[0] + '</td><td>' + r[1] + '</td><td>' + r[2] + '</td><td>' + r[3] + '</td><td class="res ' + r[5] + '">' + r[4] + '</td></tr>').join("") + '</table>');
-  h += st("⑤", "交给编译器", "代码", "编译成逐步效应序列的过程见 3.4", '<div class="pw-out">→ <b>' + d.out + '</b></div>');
+  const col = r => "var(--" + r + ")";
+  const circ = n => "①②③④⑤⑥"[n-1];
+  let h = '<div class="pv-step"><span class="who" style="background:rgba(148,163,184,.12);color:#cbd5e1;border:1px solid #475569">原文</span></div>';
+  h += '<div class="pv-text">' + d.text.map(x => {
+    if (typeof x === "string") return esc(x);
+    const und = x.r === "type" || x.r === "dir";
+    return '<span class="sp' + (und ? ' u' : '') + '" style="' + (und ? 'border-color:' + col(x.r) + ';color:' + col(x.r) : 'background:' + col(x.r)) + '">' + esc(x.t) + '<sup>' + circ(x.n) + '</sup></span>';
+  }).join("") + '</div>';
+  h += '<div class="pv-step"><span class="ar">↓</span><span class="who m">解析器（9B）</span>读懂原文，每条相关陈述写一行；时间、数字照抄，不计算</div>';
+  d.lines.forEach((l, li) => {
+    h += '<div class="pv-line ' + l.st + '"><div class="pv-lh"><span class="no">' + circ(li+1) + '</span>解析器输出的第 ' + (li+1) + ' 行</div>';
+    h += '<div class="pv-chips">' + l.chips.map(c => '<span class="pv-chip' + (c.copy ? ' copy' : '') + (c.bad ? ' bad' : '') + '"' + (c.r && !c.copy ? ' style="border-color:' + col(c.r) + '"' : '') + '><i>' + c.k + (c.copy ? ' · 照抄' : '') + '</i><b' + (c.copy ? ' style="background:' + (c.bad ? '#ef4444' : col(c.r)) + '"' : (c.r ? ' style="color:' + col(c.r) + '"' : '')) + '>' + esc(c.v) + '</b></span>').join("") + '</div>';
+    h += '<div class="pv-calc"><span class="who c">代码</span>' + (l.st === "drop" ? "" : "核对照抄的片段确实在原文中 ✓；") + l.calc + '</div>';
+    if (d.axis && (l.mark || l.segs || l.past)) {
+      const A = d.axis, N = A.hist + A.H, pc = i => (100 * (i + 0.5) / N).toFixed(2) + "%";
+      const cls = new Array(N).fill("");
+      let cells = "";
+      for (let i = 0; i < N; i++) {
+        let st = "";
+        if (l.mark && i >= l.mark[0] && i <= l.mark[1]) st = ' style="background:var(--time)"';
+        if (l.segs) { const sg = l.segs.find(g => i >= g[0] && i <= g[1]); if (sg) { const a = 0.25 + 0.75 * (sg[2] - 0.04) / 0.1; st = ' style="background:rgba(251,191,36,' + a.toFixed(2) + ')"'; } }
+        cells += '<div class="' + (i < A.hist ? 'h' : '') + '"' + st + '></div>';
+      }
+      let ax = '<div class="pv-axis"' + (l.past ? ' style="margin-top:52px"' : '') + '><div class="pv-cells">' + cells + '</div>';
+      ax += '<div class="pv-orig" style="left:' + (100 * A.hist / N).toFixed(2) + '%"><span>' + A.origin + '</span></div>';
+      A.ticks.forEach(t => ax += '<div class="pv-tick" style="left:' + pc(t[0]) + '">' + t[1] + '</div>');
+      if (l.mark) ax += '<div class="pv-mlab" style="left:' + pc((l.mark[0] + l.mark[1]) / 2) + ';color:var(--time)">' + l.mark[2] + '</div>';
+      if (l.segs) l.segs.forEach(g => { if (g[1] - g[0] >= 10) ax += '<div class="pv-mlab" style="left:' + pc((g[0] + g[1]) / 2) + ';color:var(--num);font-family:var(--mono)">' + g[2] + '</div>'; });
+      if (l.past) ax += '<div class="pv-past">' + l.past + '</div>';
+      h += ax + '</div>';
+    }
+    h += '<div style="margin-top:' + (d.axis && (l.mark || l.segs || l.past) ? 14 : 10) + 'px"><span class="pv-res ' + l.st + '">' + (l.st === "ok" ? "✓ " : l.st === "drop" ? "✗ " : "– ") + l.result + '</span></div></div>';
+  });
+  h += '<details><summary>查看模型实际看到的输入和它的原始输出</summary><pre>' + esc(d.raw[0]) + '\n\n（后接约 20 行格式说明，所有题目相同）</pre><pre>' + esc(d.raw[1]) + '</pre></details>';
   document.getElementById("pw-body").innerHTML = h;
 }
 (function(){ const t=document.getElementById("pw-tabs"); if(!t) return;
-  t.innerHTML = PW.map(d=>'<button>'+d.tab+'</button>').join("");
-  t.querySelectorAll("button").forEach((b,i)=>b.addEventListener("click",()=>drawPW(i)));
-  drawPW(0); })();
+  t.innerHTML = PV.map(d=>'<button>'+d.tab+'</button>').join("");
+  t.querySelectorAll("button").forEach((b,i)=>b.addEventListener("click",()=>drawPV(i)));
+  drawPV(0); })();
 
 drawBars("hero-bars", BARS.gift, 0.82, "相对季节性朴素预测的 MASE · 几何平均");
 drawBars("gift-bars", BARS.gift, 0.82, "相对季节性朴素预测的 MASE · 几何平均");

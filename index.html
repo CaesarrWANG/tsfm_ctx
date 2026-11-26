@@ -163,6 +163,25 @@ mark{background:rgba(245,158,11,.22);color:#fde68a;border-radius:4px;padding:0 2
 .exchart .cap{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.7}
 .exchart .cap span{white-space:nowrap}
 #ex-tabs{margin-bottom:18px}
+
+.pflow{display:grid;grid-template-columns:1.15fr 28px 1.25fr 28px .95fr;gap:0;align-items:stretch;margin-bottom:14px}
+.pflow .arrow{display:flex;align-items:center;justify-content:center;color:#4b5568;font-size:20px}
+.pflow .col{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.pflow .col .hd{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;color:var(--muted);margin-bottom:8px}
+.pflow .src{font-size:14px;line-height:1.65;color:#d6dbe6}
+.pflow .model{border-color:#2f6f66}
+.pflow .code{border-color:#4a3a17}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;padding:5px 9px;background:#0d1017;min-width:0}
+.chip i{font-style:normal;font-size:11px;color:var(--muted)}
+.chip b{font-size:13.5px;font-weight:600;color:var(--text)}
+.chip.copy{border-color:rgba(245,158,11,.55)}
+.chip.copy b{color:#fde68a}
+.chip.copy i::after{content:" · 照抄原文";color:#f59e0b}
+.pflow .res{font-size:14px;line-height:1.6}
+.pflow .res b{color:#5eead4}
+.ptype{display:inline-block;font-size:12px;font-weight:600;padding:1px 9px;border-radius:999px;margin-bottom:8px}
+@media(max-width:900px){.pflow{grid-template-columns:1fr}.pflow .arrow{transform:rotate(90deg);height:28px}}
 </style>
 </head>
 <body>
@@ -433,36 +452,49 @@ F′ = Π<sub>𝒞</sub>(F)           <span style="color:#9aa3b5"># 安全投影
     <p class="note reveal">每条效应带有可信度（已确认 / 传闻）。传闻只作为提示交给模型，不作为硬约束执行。</p>
 
     <div class="sub reveal"><span class="tag">3.3</span><h3>解析器：文本 → 结构化情境表征</h3></div>
-    <div class="cards c2 reveal">
-      <div class="card">
-        <h4>模型与输出</h4>
-        <ul class="tight muted">
-          <li>Qwen3.5-9B + LoRA 适配器；原模型权重不变，对话能力保留</li>
-          <li>每条陈述一行；时间和数值<b style="color:var(--text)">照抄原文</b>，不自己计算</li>
-          <li>照抄的片段必须能在原文中找到，否则丢弃；换算成第几步、多少数值，由代码完成</li>
-        </ul>
-        <h4 style="margin-top:14px">训练数据（约 8 万条，不含测试文本）</h4>
-        <ul class="tight muted">
-          <li>模板文本，以及 27B 改写的自然文本</li>
-          <li>CAF-7M 训练集的真实文本：27B 标注，经“换算回去与标注一致”核对后保留</li>
-          <li>外部输入、参考序列、状态变化、历史屏蔽的合成段落</li>
-        </ul>
-      </div>
-      <div class="card">
-        <h4>输出示例</h4>
-<pre><code><span style="color:#9aa3b5"># 效应：类型 | 时间关系 | 时间（照抄）| 数值（照抄）| 方向 | 节奏 | 可信度 | 重复</span>
-electricity | multiple of usual | fromfor |
-  from 2013-05-28 12:00:00 for 2 hours | 4 |
-  up | sustained | confirmed | no
-
-<span style="color:#9aa3b5"># 外部输入：名称 | 时间（照抄）| 数值（照抄）</span>
-input | load | from 05:48:01 until 05:48:27 | 0.2
-
-<span style="color:#9aa3b5"># 历史屏蔽：时间 | 持续 | 重复</span>
-exclude | starting from 1996-08-12 00:00:00 |
-  7 days | every 15 days</code></pre>
+    <div class="card reveal" style="margin-bottom:18px">
+      <div class="cards c2" style="gap:24px">
+        <div>
+          <h4>模型与输出</h4>
+          <ul class="tight muted">
+            <li>Qwen3.5-9B + LoRA 适配器；原模型权重不变，对话能力保留</li>
+            <li>每条陈述输出一行；时间和数值<b style="color:var(--text)">照抄原文</b>，不自己计算</li>
+            <li>照抄的片段必须能在原文中找到，否则丢弃；换算成第几步、多少数值，由编译器完成</li>
+          </ul>
+        </div>
+        <div>
+          <h4>训练数据（约 8 万条，不含测试文本）</h4>
+          <ul class="tight muted">
+            <li>模板文本，以及 27B 改写的自然文本</li>
+            <li>CAF-7M 训练集的真实文本：27B 标注，经“换算回去与标注一致”核对后保留</li>
+            <li>外部输入、参考序列、状态变化、历史屏蔽的合成段落</li>
+          </ul>
+        </div>
       </div>
     </div>
+    <p class="reveal muted" style="margin:0 0 14px">三个例子，从左到右：原文中的<mark>高亮</mark>是解析器照抄的片段 → 解析器输出的字段（黄色框为照抄原文） → 编译器算出的结果。</p>
+    <div class="pflow reveal">
+      <div class="col"><div class="hd">原文</div><span class="ptype" style="background:#5eead422;color:#5eead4;border:1px solid #5eead466">效应：平时的倍数</span><div class="src">…a heat wave in city A from <mark>2013-05-28 12:00:00</mark> for <mark>2 hours</mark>, leading to … and <mark>4</mark> times the usual electricity being consumed.</div></div>
+      <div class="arrow">→</div>
+      <div class="col model"><div class="hd">解析器指出（9B，只照抄、不计算）</div><div class="chips"><span class="chip"><i>类型</i><b>平时的倍数</b></span><span class="chip copy"><i>时间</i><b>from 2013-05-28 12:00 for 2 hours</b></span><span class="chip copy"><i>数值</i><b>4</b></span><span class="chip"><i>方向</i><b>上升</b></span><span class="chip"><i>可信度</i><b>已确认</b></span></div></div>
+      <div class="arrow">→</div>
+      <div class="col code"><div class="hd">编译器计算（确定性程序）</div><div class="res">预测<b>第 9–10 步</b>（12:00–13:00）<br>= 平时水平 × 4 ≈ <b>2075</b><br><span class='muted' style='font-size:13px'>写为精确值，作硬约束执行</span></div></div>
+    </div>
+    <div class="pflow reveal">
+      <div class="col"><div class="hd">原文</div><span class="ptype" style="background:#818cf822;color:#818cf8;border:1px solid #818cf866">外部输入时间表</span><div class="src">The load is set to: … <mark>0.2</mark> <mark>from 05:48:01 until 05:48:27</mark>, 0.1 from 05:48:27 until 05:48:49, …</div></div>
+      <div class="arrow">→</div>
+      <div class="col model"><div class="hd">解析器指出（9B，只照抄、不计算）</div><div class="chips"><span class="chip"><i>类型</i><b>外部输入</b></span><span class="chip"><i>名称</i><b>load</b></span><span class="chip copy"><i>时间</i><b>from 05:48:01 until 05:48:27</b></span><span class="chip copy"><i>数值</i><b>0.2</b></span></div></div>
+      <div class="arrow">→</div>
+      <div class="col code"><div class="hd">编译器计算（确定性程序）</div><div class="res">输入序列在 05:48:01–05:48:27 这些步<b>= 0.2</b><br><span class='muted' style='font-size:13px'>各段拼成历史加未来的逐步输入，交给预测器学习它与目标的关系</span></div></div>
+    </div>
+    <div class="pflow reveal">
+      <div class="col"><div class="hd">原文</div><span class="ptype" style="background:#f8717122;color:#f87171;border:1px solid #f8717166">历史屏蔽</span><div class="src">The ATM was under maintenance for <mark>7 days</mark>, periodically <mark>every 15 days</mark>, <mark>starting from 1996-08-12</mark>. Assume that the ATM will not be in maintenance in the future.</div></div>
+      <div class="arrow">→</div>
+      <div class="col model"><div class="hd">解析器指出（9B，只照抄、不计算）</div><div class="chips"><span class="chip"><i>类型</i><b>历史屏蔽</b></span><span class="chip copy"><i>起点</i><b>starting from 1996-08-12</b></span><span class="chip copy"><i>持续</i><b>7 days</b></span><span class="chip copy"><i>重复</i><b>every 15 days</b></span></div></div>
+      <div class="arrow">→</div>
+      <div class="col code"><div class="hd">编译器计算（确定性程序）</div><div class="res">历史中<b>每 15 天里的 7 天</b>标为缺失<br><span class='muted' style='font-size:13px'>预测器不会把维护期的“零取款”当成正常规律学进去</span></div></div>
+    </div>
+    <p class="note reveal">实际输出是每行用“|”分隔的字段（例如 <code>electricity | multiple of usual | fromfor | from 2013-05-28 12:00 for 2 hours | 4 | up | sustained | confirmed | no</code>）；上图把同样的字段逐项展开。更多例子及编译出的逐步序列见 3.7。</p>
 
     <div class="sub reveal"><span class="tag">3.4</span><h3>编译器与安全投影</h3></div>
     <p class="reveal muted" style="max-width:860px">预测之后，对已确认的约束做逐步截断：区间约束对每个样本截断，精确值把分布的中位数平移到该值、离散程度不变。设某一步的预测分布为 F，真实值为 y，约束区间为 C = [a, b]。</p>

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>文本驱动的时序预测 · 效应语言</title>
-<meta name="description" content="用背景文本改进时间序列预测：效应语言与两阶段方法（进展汇报）">
+<title>效应语言 · 文本条件时序预测</title>
+<meta name="description" content="用背景文本改进时间序列预测：效应语言与以效应语言为接口（进展汇报）">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -158,12 +158,12 @@ footer .wrap{display:grid;grid-template-columns:1fr 1fr;gap:28px}
   <div class="wrap">
     <a class="brand" href="#top"><i></i>Text → Effects → Forecast</a>
     <ul>
-      <li><a href="#overview">概览</a></li>
-      <li><a href="#background">背景</a></li>
-      <li><a href="#motivation">动机</a></li>
-      <li><a href="#method">方法</a></li>
-      <li><a href="#experiments">实验</a></li>
-      <li><a href="#limits">局限与下一步</a></li>
+      <li><a href="#top">Abstract</a></li>
+      <li><a href="#intro">1 Introduction</a></li>
+      <li><a href="#related">2 Related Work</a></li>
+      <li><a href="#method">3 Method</a></li>
+      <li><a href="#experiments">4 Experiments</a></li>
+      <li><a href="#conclusion">5 Conclusion</a></li>
     </ul>
   </div>
 </nav>
@@ -171,9 +171,9 @@ footer .wrap{display:grid;grid-template-columns:1fr 1fr;gap:28px}
 <header class="hero" id="top">
   <div class="wrap grid">
     <div>
-      <div class="eyebrow">Context-aided time-series forecasting</div>
-      <h1>用背景文本<br>改进时间序列预测<br><span>效应语言</span> · 两阶段方法</h1>
-      <p class="lead">在文本和预测之间放一层可检查的“效应语言”：9B 语言模型把文本解析成效应，确定性编译器把效应变成逐步约束和协变量，并带有可证明的安全保证；微调后的 Chronos-2 在这些条件下做预测。第二阶段的训练不需要成对的文本–序列数据。</p>
+      <div class="eyebrow">Abstract · 摘要</div>
+      <h1>用背景文本<br>改进时间序列预测<br>以<span>效应语言</span>为接口</h1>
+      <p class="lead">背景信息（事件、计划、约束、外部输入）往往决定了序列的未来，但时序基础模型读不懂文本，而让大模型直接给出预测，代价高且过程不可检查。我们在文本和预测之间引入一种带形式语义的<b style="color:var(--text)">效应语言</b>：9B 语言模型把文本解析成效应，确定性编译器把效应变成逐步约束和协变量，并<b style="color:var(--text)">可证明</b>地保证真陈述不会让预测变差；以效应为条件的时序模型由真实序列<b style="color:var(--text)">自监督</b>训练，不需要成对的文本–序列数据。</p>
       <div class="stats">
         <div class="stat"><b>0.476</b><span>GIFT-Eval-CTX 总分<br>榜单第一 0.497</span></div>
         <div class="stat"><b>0.155</b><span>Context-is-Key RCRPS<br>TimeBraid 0.289–0.294</span></div>
@@ -191,111 +191,115 @@ footer .wrap{display:grid;grid-template-columns:1fr 1fr;gap:28px}
   </div>
 </header>
 
-<!-- ============ OVERVIEW ============ -->
-<section id="overview">
+<!-- ============ 1 INTRODUCTION ============ -->
+<section id="intro">
   <div class="wrap">
     <div class="sec-head reveal">
-      <div class="num">00 / 概览</div>
+      <div class="num">01 / Introduction</div>
       <div>
-        <h2>一句话概括</h2>
-        <p>模型负责“指出”，代码负责“计算”：语言模型只照抄原文中的时间和数值，并判断效应类型；换算、约束执行、安全投影都由确定性程序完成；时序模型负责补全文本没说清的部分，例如只给了方向时的幅度、外部输入与目标之间的关系。</p>
+        <h2>为什么需要“读文本的预测”</h2>
+        <p>“下周一门店装修停业”“下午 2 点到 5 点用电量将是平时的 4 倍”“风扇负载从 05:48 起调到 0.2”：这些信息不在历史数据里，却直接决定了未来。只看历史的模型无论多强，都无法预见它们。</p>
       </div>
     </div>
+
+    <div class="sub reveal"><span class="tag">1.1</span><h3>现有做法的困境</h3></div>
+    <div class="cards c3 reveal">
+      <div class="card"><h4>时序基础模型读不懂文本</h4><p class="muted">Chronos-2、TimesFM 等在纯历史预测上很强，但没有接收文本的通道。在两个带背景信息的基准上，它们只能当作“不看背景”的基线（GIFT-Eval-CTX 0.795，Context-is-Key 0.290）。</p></div>
+      <div class="card"><h4>大模型直接预测：贵、不可检查</h4><p class="muted">把历史和文本一起交给大模型，效果依赖前沿模型（Gemini、GPT-5 级别）。数值由模型生成，无法验证；我们测到即使只让它输出结构化效应，时间换算也只对 55%（9B）到 75%（27B）。</p></div>
+      <div class="card"><h4>端到端融合：缺数据、无保证</h4><p class="muted">把文本和序列放进一个模型联合训练（如 TimeBraid），需要大规模成对数据，读错时也没有任何保护。它在两个基准上都接近纯历史预测：0.773 和 0.289–0.294。</p></div>
+    </div>
+
+    <div class="sub reveal"><span class="tag">1.2</span><h3>核心思路：在文本和预测之间放一层“效应语言”</h3></div>
+    <p class="reveal muted" style="max-width:900px">文本里对预测有用的，大多是可以精确表达的<b style="color:var(--text)">效应</b>：某段时间等于多少、不超过多少、上升还是下降、外部输入怎么变。我们把它们定义成一种带形式语义的中间语言，把问题拆成三件各自好做的事：</p>
     <div class="legend reveal"><span><i style="background:#2f6f66"></i>学习的模型</span><span><i style="background:#4a3a17"></i>确定性程序</span></div>
     <div class="flow reveal">
       <div class="step"><div class="n">IN</div><b>背景文本</b><span>或结构化效应（GIFT-Eval-CTX）</span></div>
-      <div class="step model"><div class="n">01</div><b>文本解析</b><span>Qwen3.5-9B + LoRA，输出效应行，原文片段照抄</span></div>
-      <div class="step code"><div class="n">02</div><b>照抄核对 + 编译</b><span>片段须在原文中；换算成逐步约束、模板、协变量</span></div>
-      <div class="step model"><div class="n">03</div><b>条件预测</b><span>Chronos-2 全量微调，以效应序列为已知未来协变量</span></div>
-      <div class="step code"><div class="n">04</div><b>安全投影</b><span>已确认的约束逐步截断；有可证明的保证</span></div>
-      <div class="step"><div class="n">OUT</div><b>预测 + 说明</b><span>25 个样本；自动生成可溯源的预测说明</span></div>
+      <div class="step model"><div class="n">01</div><b>解析</b><span>9B 语言模型把文本解析成效应，原文片段照抄</span></div>
+      <div class="step code"><div class="n">02</div><b>核对 + 编译</b><span>片段须在原文中；换算成逐步约束、模板、协变量</span></div>
+      <div class="step model"><div class="n">03</div><b>条件预测</b><span>微调的 Chronos-2，以效应序列为已知未来协变量</span></div>
+      <div class="step code"><div class="n">04</div><b>安全投影</b><span>已确认的约束逐步截断，有可证明的保证</span></div>
+      <div class="step"><div class="n">OUT</div><b>预测 + 说明</b><span>25 个样本，并自动生成可溯源的说明</span></div>
     </div>
+    <div class="table-wrap reveal">
+      <table>
+        <tr><th style="width:50%">观察</th><th>设计</th></tr>
+        <tr><td>大模型读文本没问题，但换算时间和数值容易出错</td><td>语言模型只<b>指出</b>原文片段，换算交给编译器</td></tr>
+        <tr><td>读错的效应会损害预测</td><td>约束执行带<b>可证明的安全性</b>：真陈述不变差，假陈述损失有界</td></tr>
+        <tr><td>文本信息常常不完整：只有方向、形状、极值或外部输入</td><td>训练<b>以效应为条件</b>的时序模型，从历史中补全</td></tr>
+        <tr><td>成对的“文本–序列”数据稀缺</td><td>从真实序列的未来中提取效应，<b>自监督</b>训练</td></tr>
+      </table>
+    </div>
+
+    <div class="sub reveal"><span class="tag">1.3</span><h3>贡献</h3></div>
     <div class="cards c3 reveal">
-      <div class="card"><h4>贡献 1 · 效应语言与安全保证</h4><p class="muted">文本和结构化信息编译到同一种带形式语义的中间表示；陈述为真时截断不会让预测变差，为假时损失有界。</p></div>
-      <div class="card"><h4>贡献 2 · 不需要成对数据的训练</h4><p class="muted">从真实序列的未来中提取效应，加入“说了但没发生”的陈述、不同精度的描述和外部输入，自监督地训练以效应为条件的预测模型。</p></div>
-      <div class="card"><h4>贡献 3 · 小模型、可溯源</h4><p class="muted">9B + 0.12B 在两个基准上超过 TimeBraid 和基于 GPT-5.6 的智能体；每个效应都能追溯到原文句子。</p></div>
+      <div class="card"><h4>① 效应语言与安全保证</h4><p class="muted">文本和结构化信息编译到同一种带形式语义的中间表示。我们证明：陈述为真时，约束投影不会增加 CRPS；陈述为假时，增加量不超过陈述的偏差。实证检验中违反 0 次。</p></div>
+      <div class="card"><h4>② 不需要成对数据的训练</h4><p class="muted">从真实序列的未来中提取效应，加入“说了但没发生”的陈述、不同精度的描述和人造外部输入，自监督地训练以效应为条件的预测模型。</p></div>
+      <div class="card"><h4>③ 小模型、强结果、可溯源</h4><p class="muted">9B + 0.12B 在 GIFT-Eval-CTX 上超过基于 GPT-5.6 的榜单第一（0.476 对 0.497），在 Context-is-Key 上比 TimeBraid 好约 0.13；每个效应都能追溯到原文句子。</p></div>
     </div>
   </div>
 </section>
 
-<!-- ============ BACKGROUND ============ -->
-<section id="background">
+<!-- ============ 2 RELATED WORK ============ -->
+<section id="related">
   <div class="wrap">
     <div class="sec-head reveal">
-      <div class="num">01 / 背景</div>
+      <div class="num">02 / Related Work</div>
       <div>
-        <h2>任务与基准</h2>
-        <p>给定一段序列的历史，以及与之相关的背景信息，预测未来 H 步。点预测和概率预测都要评价。背景信息可能是结构化的效应描述，也可能是自然语言。</p>
+        <h2>相关工作与定位</h2>
+        <p>我们的方法处在四条研究线的交汇处：时序基础模型、用语言模型做预测、文本–序列多模态模型，以及把自然语言解析成可执行表示。</p>
       </div>
     </div>
     <div class="cards c2 reveal">
-      <div class="card">
-        <h3>GIFT-Eval-CTX <span class="pill">结构化效应</span></h3>
-        <ul class="tight muted">
-          <li>10,000 道题，78 个“数据集 × 预测长度”组；短、中、长期，最长 900 步</li>
-          <li>背景信息：<b style="color:var(--text)">Macro</b>（趋势、全程水平范围、季节性）与 <b style="color:var(--text)">Micro</b>（局部偏移、跳变）</li>
-          <li>指标：相对季节性朴素预测的 MASE，按组取几何平均</li>
-          <li>检验：能否把效应信息用好（第二阶段）</li>
-        </ul>
-      </div>
-      <div class="card">
-        <h3>Context-is-Key <span class="pill violet">自然语言</span></h3>
-        <ul class="tight muted">
-          <li>355 道题，71 类任务；一般预测 24–100 步</li>
-          <li>背景信息：事件、约束、因果关系、外部输入、历史异常等的文本描述</li>
-          <li>指标：官方 RCRPS，即概率预测误差，重点区域加权，违反约束会被重罚</li>
-          <li>检验：能否读懂文本并用好（完整链路）</li>
-        </ul>
-      </div>
+      <div class="card"><h4>时序基础模型</h4><p class="muted">Chronos / Chronos-2、TimesFM、Moirai、Toto 等在大规模序列上预训练，零样本预测能力强。Chronos-2 支持已知的未来协变量，这正是我们把效应注入模型的接口。<br><b style="color:var(--text)">区别：</b>我们不改模型结构，而是给它一种从文本得到协变量的方式，并训练它理解这些协变量。</p></div>
+      <div class="card"><h4>用语言模型做预测</h4><p class="muted">一类工作把数值序列写成文本，让大模型直接续写（如 LLMTime）；另一类把序列表示对齐到冻结的语言模型（如 Time-LLM）。Context-is-Key 上的强基线是前沿大模型的直接提示。<br><b style="color:var(--text)">区别：</b>我们不让语言模型生成任何预测数值，只让它解析文本。</p></div>
+      <div class="card"><h4>文本–序列多模态模型与智能体</h4><p class="muted">TimeBraid 把文本和序列联合建模，依赖大规模成对数据；CAF-7M 等数据集提供成对语料；MoiraiAgent 让前沿大模型调用时序模型作为工具。<br><b style="color:var(--text)">区别：</b>预测器完全不需要成对文本；中间表示可检查，且有理论保证；不依赖前沿大模型。</p></div>
+      <div class="card"><h4>语义解析与程序辅助推理</h4><p class="muted">把自然语言解析成可执行的领域语言、把计算交给程序（如 PAL、Toolformer 一类工作），已被证明能减少语言模型的计算错误。<br><b style="color:var(--text)">区别：</b>我们为预测设计了专门的效应语言，并给出了它的语义在 CRPS 下的安全性质。</p></div>
     </div>
-    <div class="sub reveal"><h3>现有路线</h3></div>
+    <div class="sub reveal"><h3>定位对比</h3></div>
     <div class="table-wrap reveal">
       <table>
-        <tr><th>路线</th><th>代表</th><th>局限</th></tr>
-        <tr><td>时序基础模型，只看历史</td><td>Chronos-2、TimesFM、Moirai</td><td class="muted">用不上文本</td></tr>
-        <tr><td>大模型直接给出预测</td><td>GPT、Gemini、Llama 直接提示</td><td class="muted">依赖前沿大模型；数值由模型生成，过程不可检查</td></tr>
-        <tr><td>端到端融合文本和序列</td><td>TimeBraid（1.2B–6.7B）</td><td class="muted">需要大规模成对数据；在两个基准上都接近纯历史预测的水平</td></tr>
-        <tr><td>智能体调用工具</td><td>MoiraiAgent（GPT-5.6）</td><td class="muted">依赖前沿大模型，成本高</td></tr>
+        <tr><th>路线</th><th>代表</th><th>用文本</th><th>不需要成对数据</th><th>过程可检查</th><th>理论保证</th><th>模型规模</th></tr>
+        <tr><td>时序基础模型</td><td>Chronos-2、TimesFM、Moirai</td><td>—</td><td>✓</td><td>—</td><td>—</td><td class="muted">小</td></tr>
+        <tr><td>大模型直接预测</td><td>GPT、Gemini、Llama 直接提示</td><td>✓</td><td>✓</td><td>—</td><td>—</td><td class="muted">前沿大模型</td></tr>
+        <tr><td>端到端多模态</td><td>TimeBraid</td><td>✓</td><td>—</td><td>—</td><td>—</td><td class="muted">1.2B–6.7B</td></tr>
+        <tr><td>智能体</td><td>MoiraiAgent</td><td>✓</td><td>✓</td><td>部分</td><td>—</td><td class="muted">前沿大模型</td></tr>
+        <tr class="ours"><td><b>我们</b></td><td>效应语言</td><td>✓</td><td>✓（预测器）</td><td>✓</td><td>✓</td><td class="muted">9B + 0.12B</td></tr>
       </table>
     </div>
   </div>
 </section>
 
-<!-- ============ MOTIVATION ============ -->
-<section id="motivation">
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <div class="num">02 / 动机</div>
-      <div>
-        <h2>从观察到设计</h2>
-        <p>每一项设计都对应一个具体的观察。</p>
-      </div>
-    </div>
-    <div class="table-wrap reveal">
-      <table>
-        <tr><th style="width:52%">观察</th><th>由此得到的设计</th></tr>
-        <tr><td>文本里对预测有用的，大多是可以精确表达的“效应”：某段时间等于多少、不超过多少、上升还是下降、外部输入怎么变</td><td>定义一种<b>效应语言</b>作为文本和预测之间的中间表示</td></tr>
-        <tr><td>大模型读文本没问题，但直接输出时，时间换算对的只有 55%（9B）到 75%（27B）</td><td>语言模型只<b>指出</b>原文片段，换算交给确定性的编译器</td></tr>
-        <tr><td>读错的效应会损害预测</td><td>约束执行要有<b>可证明的安全性</b>：陈述为真时不变差，为假时损失有界</td></tr>
-        <tr><td>文本给的信息常常不完整：只有方向、只有极值、只有形状、只有外部输入</td><td>训练一个<b>以效应为条件</b>的时序模型，从历史中补全</td></tr>
-        <tr><td>成对的“文本–序列”数据稀缺</td><td>从序列的真实未来中自动提取效应，<b>自监督</b>地训练第二阶段</td></tr>
-      </table>
-    </div>
-  </div>
-</section>
-
-<!-- ============ METHOD ============ -->
+<!-- ============ 3 METHOD ============ -->
 <section id="method">
   <div class="wrap">
     <div class="sec-head reveal">
-      <div class="num">03 / 方法</div>
+      <div class="num">03 / Method</div>
       <div>
-        <h2>效应语言 + 两阶段</h2>
+        <h2>以效应语言为接口的预测框架</h2>
         <p>文本前端（Context-is-Key）和结构化前端（GIFT-Eval-CTX）都编译到同一种效应语言，之后的编译、预测、投影完全共用。</p>
       </div>
     </div>
 
-    <div class="sub reveal"><span class="tag">3.1</span><h3>效应语言</h3></div>
+    <div class="sub reveal"><span class="tag">3.1</span><h3>问题定义</h3></div>
+    <div class="cards c2 reveal">
+      <div class="card">
+        <p class="muted">给定历史 y<sub>1:T</sub> 和背景信息 c（文本或结构化效应），预测未来 y<sub>T+1:T+H</sub> 的分布。我们把映射 c ↦ 预测分解为：</p>
+        <div class="formula" style="white-space:pre;line-height:1.8">E = Parse(c)          <span style="color:#9aa3b5"># 效应程序（解析器，学习）</span>
+(Z, 𝒞) = Compile(E, y<sub>1:T</sub>)  <span style="color:#9aa3b5"># 协变量 Z ∈ ℝ<sup>H×12</sup>，约束 𝒞<sub>t</sub> = [a<sub>t</sub>, b<sub>t</sub>]</span>
+F = p<sub>θ</sub>(· | y<sub>1:T</sub>, Z)   <span style="color:#9aa3b5"># 效应条件预测器（学习）</span>
+F′ = Π<sub>𝒞</sub>(F)           <span style="color:#9aa3b5"># 安全投影（确定性）</span></div>
+      </div>
+      <div class="card">
+        <h4>三个组件</h4>
+        <ul class="tight muted">
+          <li><b style="color:var(--text)">解析器</b>：Qwen3.5-9B + LoRA。只做语言理解：判断效应类型，照抄原文中的时间和数值</li>
+          <li><b style="color:var(--text)">编译器</b>：确定性程序。时间与数值换算、约束执行、安全投影</li>
+          <li><b style="color:var(--text)">效应条件预测器</b>：微调的 Chronos-2。补全文本没说清的部分：只给方向时的幅度、形状、外部输入与目标的关系</li>
+        </ul>
+        <p class="muted" style="font-size:14px;margin:0">GIFT-Eval-CTX 的结构化效应不需要解析器，直接进入编译器。两个基准共用编译器及之后的全部部分。</p>
+      </div>
+    </div>
+    <div class="sub reveal"><span class="tag">3.2</span><h3>效应语言</h3></div>
     <div class="table-wrap reveal">
       <table>
         <tr><th>效应</th><th>例子</th><th>语义（编译结果）</th><th>执行</th></tr>
@@ -310,7 +314,7 @@ footer .wrap{display:grid;grid-template-columns:1fr 1fr;gap:28px}
     </div>
     <p class="note reveal">每条效应带有可信度（已确认 / 传闻）。传闻只作为提示交给模型，不作为硬约束执行。</p>
 
-    <div class="sub reveal"><span class="tag">3.2</span><h3>第一阶段：文本 → 效应语言</h3></div>
+    <div class="sub reveal"><span class="tag">3.3</span><h3>解析器：文本 → 效应语言</h3></div>
     <div class="cards c2 reveal">
       <div class="card">
         <h4>模型与输出</h4>
@@ -342,7 +346,7 @@ exclude | starting from 1996-08-12 00:00:00 |
       </div>
     </div>
 
-    <div class="sub reveal"><span class="tag">3.3</span><h3>效应编译与安全投影</h3></div>
+    <div class="sub reveal"><span class="tag">3.4</span><h3>编译器与安全投影</h3></div>
     <p class="reveal muted" style="max-width:860px">预测之后，对已确认的约束做逐步截断：区间约束对每个样本截断，精确值把分布的中位数平移到该值、离散程度不变。设某一步的预测分布为 F，真实值为 y，约束区间为 C = [a, b]。</p>
     <div class="cards c3 reveal">
       <div class="card">
@@ -363,7 +367,7 @@ exclude | starting from 1996-08-12 00:00:00 |
     </div>
     <p class="note reveal">含义：代码层是可证明的“安全层”，损失只可能来自读错，或者文本本身不准确。端到端模型和大模型直接提示都没有这种保证。</p>
 
-    <div class="sub reveal"><span class="tag">3.4</span><h3>第二阶段：以效应为条件的预测</h3></div>
+    <div class="sub reveal"><span class="tag">3.5</span><h3>效应条件预测器与自监督训练</h3></div>
     <div class="cards c2 reveal">
       <div class="card">
         <h4>模型</h4>
@@ -391,12 +395,12 @@ exclude | starting from 1996-08-12 00:00:00 |
       </div>
     </div>
 
-    <div class="sub reveal"><span class="tag">3.5</span><h3>推理与可溯源说明</h3></div>
+    <div class="sub reveal"><span class="tag">3.6</span><h3>推理与可溯源说明</h3></div>
     <div class="cards c2 reveal">
       <div class="card">
         <h4>混合方案</h4>
         <ul class="tight muted">
-          <li>有陈述的步：第二阶段模型，再做安全投影</li>
+          <li>有陈述的步：用预测器的输出，再做安全投影</li>
           <li>没有陈述的步、精确值的步：以原版 Chronos-2 的预测为基础</li>
           <li>没有读出任何效应：原版 Chronos-2 只看历史的预测</li>
         </ul>
@@ -420,23 +424,24 @@ exclude | starting from 1996-08-12 00:00:00 |
   </div>
 </section>
 
+
 <!-- ============ EXPERIMENTS ============ -->
 <section id="experiments">
   <div class="wrap">
     <div class="sec-head reveal">
-      <div class="num">04 / 实验</div>
+      <div class="num">04 / Experiments</div>
       <div>
-        <h2>结果</h2>
-        <p>GIFT-Eval-CTX 用官方数据和榜单的汇总代码；我们复算的季节性朴素预测、Chronos-2、TimeBraid 的每题 MASE 与公开结果完全一致（10,000 / 10,000）。Context-is-Key 用官方 RCRPS 脚本，每题 25 个样本。第二阶段每个设置训练两个随机种子。</p>
+        <h2>实验</h2>
+        <p>GIFT-Eval-CTX 用官方数据和榜单的汇总代码；我们复算的季节性朴素预测、Chronos-2、TimeBraid 的每题 MASE 与公开结果完全一致（10,000 / 10,000）。Context-is-Key 用官方 RCRPS 脚本，每题 25 个样本。预测器每个设置训练两个随机种子。我们回答五个问题：<b style="color:var(--text)">Q1</b> 结构化效应下效果如何？<b style="color:var(--text)">Q2</b> 文本下效果如何？<b style="color:var(--text)">Q3</b> 学习的预测器带来了什么？<b style="color:var(--text)">Q4</b> “照抄 + 编译”是否比让语言模型直接给出效应更准？<b style="color:var(--text)">Q5</b> 安全保证和结果是否可靠？</p>
       </div>
     </div>
 
     <div class="tabs reveal" role="tablist">
-      <button class="active" data-tab="t-gift">GIFT-Eval-CTX</button>
-      <button data-tab="t-cik">Context-is-Key</button>
-      <button data-tab="t-s2">第二阶段的价值</button>
-      <button data-tab="t-s1">第一阶段准确率</button>
-      <button data-tab="t-safe">安全性与稳健性</button>
+      <button class="active" data-tab="t-gift">Q1 · GIFT-Eval-CTX</button>
+      <button data-tab="t-cik">Q2 · Context-is-Key</button>
+      <button data-tab="t-s2">Q3 · 预测器的价值</button>
+      <button data-tab="t-s1">Q4 · 解析准确率</button>
+      <button data-tab="t-safe">Q5 · 安全性与稳健性</button>
     </div>
 
     <!-- GIFT -->
@@ -482,7 +487,7 @@ exclude | starting from 1996-08-12 00:00:00 |
           <div class="table-wrap" style="margin:0">
             <table>
               <tr><th>版本</th><th class="num">RCRPS</th></tr>
-              <tr><td>27B 改写 + 9B 提取；第二阶段 E14</td><td class="num">0.255</td></tr>
+              <tr><td>27B 改写 + 9B 提取；预测器 E14</td><td class="num">0.255</td></tr>
               <tr><td>一步式 9B（蒸馏）；E15</td><td class="num">0.190</td></tr>
               <tr class="ours"><td>+ 外部输入、参考序列、历史屏蔽；E16</td><td class="num"><b>0.153–0.157</b></td></tr>
             </table>
@@ -502,8 +507,8 @@ exclude | starting from 1996-08-12 00:00:00 |
               <tr><th>做法</th><th class="num">总分</th></tr>
               <tr><td>只看历史</td><td class="num">0.795</td></tr>
               <tr><td>只用规则（代码执行约束）</td><td class="num">0.634</td></tr>
-              <tr><td>只用第二阶段模型（不投影）</td><td class="num">0.542–0.554</td></tr>
-              <tr class="ours"><td><b>混合：第二阶段 + 安全投影</b></td><td class="num"><b>0.474–0.478</b></td></tr>
+              <tr><td>只用预测器（不投影）</td><td class="num">0.542–0.554</td></tr>
+              <tr class="ours"><td><b>混合：预测器 + 安全投影</b></td><td class="num"><b>0.474–0.478</b></td></tr>
             </table>
           </div>
           <p class="note">只用规则只能执行约束；趋势、形状、只给极值的偏移都需要模型从历史中补全。</p>
@@ -527,24 +532,24 @@ exclude | starting from 1996-08-12 00:00:00 |
         <h4 style="color:var(--text)">Context-is-Key：输入相同且正确时，外部输入交给谁（RCRPS）</h4>
         <div class="table-wrap" style="margin:0">
           <table>
-            <tr><th>任务</th><th class="num">只看历史</th><th class="num">原版 Chronos-2 + 输入</th><th class="num">第二阶段 + 输入（种子 0 / 1）</th></tr>
+            <tr><th>任务</th><th class="num">只看历史</th><th class="num">原版 Chronos-2 + 输入</th><th class="num">预测器 + 输入（种子 0 / 1）</th></tr>
             <tr><td>因果方程（隐含 / 最少信息）</td><td class="num">0.318</td><td class="num">0.180</td><td class="num"><b>0.109 / 0.132</b></td></tr>
             <tr><td>风扇转速</td><td class="num">0.460</td><td class="num">0.427</td><td class="num"><b>0.316 / 0.311</b></td></tr>
             <tr><td>风扇压力（只说“亲和定律”）</td><td class="num">0.656</td><td class="num">0.420</td><td class="num"><b>0.290 / 0.370</b></td></tr>
             <tr><td>风扇压力（明确说平方关系）</td><td class="num">0.656</td><td class="num"><b>0.289</b></td><td class="num">0.265 / 0.330</td></tr>
           </table>
         </div>
-        <p class="note">端到端（用第一阶段实际读出的结果）：规则 0.165 → 混合 0.153 / 0.157。另做了一组对照：把读出的数值去掉、只保留方向时，第二阶段在 ATM 停用、交通量下降、传感器维护三类任务上把误差降低了 20%–35%，而规则在这种情况下无能为力。</p>
+        <p class="note">端到端（用解析器实际读出的结果）：规则 0.165 → 混合 0.153 / 0.157。另做了一组对照：把读出的数值去掉、只保留方向时，预测器在 ATM 停用、交通量下降、传感器维护三类任务上把误差降低了 20%–35%，而规则在这种情况下无能为力。</p>
       </div>
     </div>
 
     <!-- Stage 1 accuracy -->
     <div class="tabpanel" id="t-s1">
       <div class="card">
-        <h4 style="color:var(--text)">Context-is-Key 中有标准答案的 60 道题；端到端使用同一个第二阶段</h4>
+        <h4 style="color:var(--text)">Context-is-Key 中有标准答案的 60 道题；端到端使用同一个预测器</h4>
         <div class="table-wrap" style="margin:0">
           <table>
-            <tr><th>第一阶段</th><th class="num">找到</th><th class="num">时间对</th><th class="num">整段全对</th><th class="num">找不到依据的数值</th><th class="num">端到端 RCRPS</th></tr>
+            <tr><th>解析器</th><th class="num">找到</th><th class="num">时间对</th><th class="num">整段全对</th><th class="num">找不到依据的数值</th><th class="num">端到端 RCRPS</th></tr>
             <tr><td>原版 9B 直接输出 JSON</td><td class="num">65%</td><td class="num">55%</td><td class="num">50%</td><td class="num">2%</td><td class="num">0.261</td></tr>
             <tr><td>27B 直接输出 JSON</td><td class="num">92%</td><td class="num">75%</td><td class="num">72%</td><td class="num">0</td><td class="num">0.194</td></tr>
             <tr class="ours"><td><b>9B 照抄 + 代码换算</b></td><td class="num"><b>100%</b></td><td class="num"><b>100%</b></td><td class="num"><b>98%</b></td><td class="num">0（核对拦下 1 行）</td><td class="num"><b>0.190</b></td></tr>
@@ -574,36 +579,38 @@ exclude | starting from 1996-08-12 00:00:00 |
           <details><summary>训练数据的部分规则参数曾在 3,000 道测试题上调过</summary><div class="body">只看另外 7,000 道没参与调参的题：我们 0.480 / 0.478，MoiraiAgent 0.501，领先依然成立。</div></details>
           <details><summary>趋势判断阈值是否对着测试标注优化过</summary><div class="body">不是。只用 3,000 道题重新搜索，一致率最高的取值（0.15, 0.6）与现值（0.06, 0.5）不同；现值的一致率在两组题上相同（0.589 / 0.595）。</div></details>
           <details><summary>微调是否损害只看历史的能力</summary><div class="body">GIFT-Eval-CTX：0.787，原版 0.795，没有退化。Context-is-Key：0.295–0.303，原版 0.290，轻微退化；推理时没有陈述的步改用原版来规避。</div></details>
-          <details><summary>“上下界约束”任务的大幅提升是否碰巧</summary><div class="body">逐题核对，5 道题都是正确读出约束（旧版第一阶段只读对 1 道）。</div></details>
+          <details><summary>“上下界约束”任务的大幅提升是否碰巧</summary><div class="body">逐题核对，5 道题都是正确读出约束（旧版解析器只读对 1 道）。</div></details>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============ LIMITS ============ -->
-<section id="limits">
+
+<!-- ============ 5 CONCLUSION ============ -->
+<section id="conclusion">
   <div class="wrap">
     <div class="sec-head reveal">
-      <div class="num">05 / 局限与下一步</div>
+      <div class="num">05 / Conclusion</div>
       <div>
-        <h2>还需要解决的问题</h2>
-        <p>以下几点在投稿前需要补上实验或在论文中如实说明。</p>
+        <h2>结论</h2>
+        <p>我们提出以效应语言为接口、把文本信息用于时间序列预测的框架：语言模型只负责把文本解析成效应，编译器以可证明安全的方式执行其中的约束，效应条件预测器从历史中补全文本没说清的部分。它不需要成对的文本–序列数据，只用 9B 语言模型加 0.12B 时序模型，就在 GIFT-Eval-CTX 上超过了基于前沿大模型的智能体，在 Context-is-Key 上接近前沿大模型的直接提示，而且每一处修改都能追溯到原文。</p>
       </div>
     </div>
+    <div class="sub reveal"><h3>局限</h3></div>
     <div class="cards c3 reveal">
-      <div class="card"><h4>“看过测试题”</h4><p class="muted">第一阶段的若干修正和外部输入的训练模板，是看过 Context-is-Key 的题型后设计的；第二阶段版本也是按测试成绩选的。需要一个独立的文本测试集来检验。</p></div>
-      <div class="card"><h4>适用范围</h4><p class="muted">常识和类比类的题（约占 Context-is-Key 权重的 14%）不在方法范围内，例如“新区靠近河流，参照其他区估计救援次数”。前沿大模型的优势主要在这里。</p></div>
-      <div class="card"><h4>第二阶段在文本基准上的贡献偏小</h4><p class="muted">Context-is-Key 上约 0.01，比 GIFT-Eval-CTX 上（0.634 → 0.476）小得多：文本中的效应多数带明确数值，代码直接写入就够了。</p></div>
+      <div class="card"><h4>“看过测试题”</h4><p class="muted">解析器的若干修正和外部输入的训练模板，是看过 Context-is-Key 的题型后设计的；预测器的版本也是按测试成绩选的。需要一个独立的文本测试集来检验。</p></div>
+      <div class="card"><h4>适用范围</h4><p class="muted">需要常识和类比的题（约占 Context-is-Key 权重的 14%）不在方法范围内，例如“新区靠近河流，参照其他区估计救援次数”。前沿大模型的优势主要在这里。</p></div>
+      <div class="card"><h4>预测器在文本基准上的贡献偏小</h4><p class="muted">在 Context-is-Key 上约 0.01，比在 GIFT-Eval-CTX 上（0.634 → 0.476）小得多：文本中的效应多数带明确数值，编译器直接写入就够了。</p></div>
     </div>
     <div class="sub reveal"><h3>下一步</h3></div>
     <div class="table-wrap reveal">
       <table>
         <tr><th>事项</th><th>目的</th><th>状态</th></tr>
-        <tr><td>第一阶段第四轮训练</td><td class="muted">修正 ATM 停用、假日交通等题上的退步</td><td><span class="pill amber">进行中</span></td></tr>
+        <tr><td>解析器第四轮训练</td><td class="muted">修正 ATM 停用、假日交通等题上的退步</td><td><span class="pill amber">进行中</span></td></tr>
         <tr><td>换 TimesFM 底座</td><td class="muted">证明效应语言和训练方法不依赖 Chronos-2</td><td><span class="pill violet">计划</span></td></tr>
         <tr><td>把 GIFT-Eval-CTX 的结构化效应改写成自然文本</td><td class="muted">得到独立、大规模的“文本 → 预测”测试集</td><td><span class="pill violet">计划</span></td></tr>
-        <tr><td>消融实验</td><td class="muted">第二阶段训练数据的各个成分、数据规模曲线；照抄 vs 直接计算</td><td><span class="pill violet">计划</span></td></tr>
+        <tr><td>消融实验</td><td class="muted">预测器训练数据的各个成分、数据规模曲线；照抄 vs 直接计算</td><td><span class="pill violet">计划</span></td></tr>
         <tr><td>GIFT-Eval-CTX 榜单提交</td><td class="muted">第三方认可的成绩</td><td><span class="pill violet">待定</span></td></tr>
       </table>
     </div>
@@ -614,7 +621,7 @@ exclude | starting from 1996-08-12 00:00:00 |
   <div class="wrap">
     <div>
       <b style="color:var(--text)">进展汇报</b> · 2026-11-26<br>
-      数字均为当前版本；“两个种子”指第二阶段的两次独立训练。
+      数字均为当前版本；“两个种子”指预测器的两次独立训练。
     </div>
     <div>
       引用：GIFT-Eval-CTX（Salesforce）· Context-is-Key（ServiceNow）· Chronos-2（Amazon）· Qwen3.5 · TimeBraid · MoiraiAgent<br>

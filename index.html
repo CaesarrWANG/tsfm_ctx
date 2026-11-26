@@ -176,7 +176,7 @@ footer .wrap{display:grid;grid-template-columns:1fr 1fr;gap:28px}
       <p class="lead">背景信息（事件、计划、约束、外部输入）往往决定了序列的未来，但时序基础模型读不懂文本，而让大模型直接给出预测，代价高且过程不可检查。我们在文本和预测之间引入一种带形式语义的<b style="color:var(--text)">结构化情境表征</b>：9B 语言模型把文本解析成效应，确定性编译器把效应变成逐步约束和协变量，并<b style="color:var(--text)">可证明</b>地保证真陈述不会让预测变差；以效应为条件的时序模型由真实序列<b style="color:var(--text)">自监督</b>训练，不需要成对的文本–序列数据。</p>
       <div class="stats">
         <div class="stat"><b>0.476</b><span>GIFT-Eval-CTX 总分<br>榜单第一 0.497</span></div>
-        <div class="stat"><b>0.155</b><span>Context-is-Key RCRPS<br>TimeBraid 0.289–0.294</span></div>
+        <div class="stat"><b>0.154</b><span>Context-is-Key RCRPS<br>TimeBraid 0.289–0.294</span></div>
         <div class="stat"><b>9B+0.12B</b><span>语言模型 + 时序模型<br>不依赖前沿大模型</span></div>
         <div class="stat"><b>0 次</b><span>安全保证被违反<br>225 万步实证检验</span></div>
       </div>
@@ -284,7 +284,7 @@ footer .wrap{display:grid;grid-template-columns:1fr 1fr;gap:28px}
     <div class="cards c3 reveal">
       <div class="card"><h4>① 结构化情境表征与安全保证</h4><p class="muted">文本和结构化信息编译到同一种带形式语义的中间表示。我们证明：陈述为真时，约束投影不会增加 CRPS；陈述为假时，增加量不超过陈述的偏差。实证检验中违反 0 次。</p></div>
       <div class="card"><h4>② 不需要成对数据的训练</h4><p class="muted">从真实序列的未来中提取效应，加入“说了但没发生”的陈述、不同精度的描述和人造外部输入，自监督地训练以效应为条件的预测模型。</p></div>
-      <div class="card"><h4>③ 小模型、强结果、可溯源</h4><p class="muted">9B + 0.12B 在 GIFT-Eval-CTX 上超过基于 GPT-5.6 的榜单第一（0.476 对 0.497），在 Context-is-Key 上比 TimeBraid 好约 0.13；每个效应都能追溯到原文句子。</p></div>
+      <div class="card"><h4>③ 小模型、强结果、可溯源</h4><p class="muted">9B + 0.12B 在 GIFT-Eval-CTX 上超过基于 GPT-5.6 的榜单第一（0.476 对 0.497），在 Context-is-Key 上比 TimeBraid 好约 0.14；每个效应都能追溯到原文句子。</p></div>
     </div>
   </div>
 </section>
@@ -529,8 +529,8 @@ exclude | starting from 1996-08-12 00:00:00 |
         <div class="card">
           <h4 style="color:var(--text)">要点</h4>
           <ul class="tight muted">
-            <li>0.153 / 0.157（两个种子），接近 GPT-5.4 直接提示（0.145）</li>
-            <li>好于 GPT-4o 直接提示（0.191），比 TimeBraid 好约 0.13</li>
+            <li>0.152 / 0.156（两个种子），接近 GPT-5.4 直接提示（0.145）</li>
+            <li>好于 GPT-4o 直接提示（0.191），比 TimeBraid 好约 0.14</li>
             <li>只用 9B 语言模型；前沿大模型的剩余优势主要在需要常识和类比的题上</li>
           </ul>
           <h4 style="color:var(--text);margin-top:16px">方法演进</h4>
@@ -539,7 +539,7 @@ exclude | starting from 1996-08-12 00:00:00 |
               <tr><th>版本</th><th class="num">RCRPS</th></tr>
               <tr><td>27B 改写 + 9B 提取；预测器 E14</td><td class="num">0.255</td></tr>
               <tr><td>一步式 9B（蒸馏）；E15</td><td class="num">0.190</td></tr>
-              <tr class="ours"><td>+ 外部输入、参考序列、历史屏蔽；E16</td><td class="num"><b>0.153–0.157</b></td></tr>
+              <tr class="ours"><td>+ 外部输入、参考序列、历史屏蔽；E16</td><td class="num"><b>0.152–0.156</b></td></tr>
             </table>
           </div>
         </div>
@@ -589,7 +589,7 @@ exclude | starting from 1996-08-12 00:00:00 |
             <tr><td>风扇压力（明确说平方关系）</td><td class="num">0.656</td><td class="num"><b>0.289</b></td><td class="num">0.265 / 0.330</td></tr>
           </table>
         </div>
-        <p class="note">端到端（用解析器实际读出的结果）：规则 0.165 → 混合 0.153 / 0.157。另做了一组对照：把读出的数值去掉、只保留方向时，预测器在 ATM 停用、交通量下降、传感器维护三类任务上把误差降低了 20%–35%，而规则在这种情况下无能为力。</p>
+        <p class="note">端到端（用解析器实际读出的结果）：规则 0.165 → 混合 0.152 / 0.156。另做了一组对照：把读出的数值去掉、只保留方向时，预测器在 ATM 停用、交通量下降、传感器维护三类任务上把误差降低了 20%–35%，而规则在这种情况下无能为力。</p>
       </div>
     </div>
 
@@ -649,7 +649,7 @@ exclude | starting from 1996-08-12 00:00:00 |
     </div>
     <div class="sub reveal"><h3>局限</h3></div>
     <div class="cards c3 reveal">
-      <div class="card"><h4>“看过测试题”</h4><p class="muted">解析器的若干修正和外部输入的训练模板，是看过 Context-is-Key 的题型后设计的；预测器的版本也是按测试成绩选的。需要一个独立的文本测试集来检验。</p></div>
+      <div class="card"><h4>“看过测试题”</h4><p class="muted">解析器的若干修正和外部输入的训练模板，是看过 Context-is-Key 的题型后设计的；预测器的版本也是按测试成绩选的。需要一个独立的文本测试集来检验。解析器已在第四轮冻结，已知失败案例：把未来的“停业”读成历史屏蔽，隐含的节假日没有识别，把“日照峰值出现在 11:54”误读为外部输入。</p></div>
       <div class="card"><h4>适用范围</h4><p class="muted">需要常识和类比的题（约占 Context-is-Key 权重的 14%）不在方法范围内，例如“新区靠近河流，参照其他区估计救援次数”。前沿大模型的优势主要在这里。</p></div>
       <div class="card"><h4>预测器在文本基准上的贡献偏小</h4><p class="muted">在 Context-is-Key 上约 0.01，比在 GIFT-Eval-CTX 上（0.634 → 0.476）小得多：文本中的效应多数带明确数值，编译器直接写入就够了。</p></div>
     </div>
@@ -657,7 +657,7 @@ exclude | starting from 1996-08-12 00:00:00 |
     <div class="table-wrap reveal">
       <table>
         <tr><th>事项</th><th>目的</th><th>状态</th></tr>
-        <tr><td>解析器第四轮训练</td><td class="muted">修正 ATM 停用、假日交通等题上的退步</td><td><span class="pill amber">进行中</span></td></tr>
+        <tr><td>独立的文本测试集</td><td class="muted">解析器已在第四轮冻结；不再针对 Context-is-Key 的错误修改，改用独立测试集衡量泛化</td><td><span class="pill amber">下一步</span></td></tr>
         <tr><td>换 TimesFM 底座</td><td class="muted">证明结构化情境表征和训练方法不依赖 Chronos-2</td><td><span class="pill violet">计划</span></td></tr>
         <tr><td>把 GIFT-Eval-CTX 的结构化效应改写成自然文本</td><td class="muted">得到独立、大规模的“文本 → 预测”测试集</td><td><span class="pill violet">计划</span></td></tr>
         <tr><td>消融实验</td><td class="muted">预测器训练数据的各个成分、数据规模曲线；照抄 vs 直接计算</td><td><span class="pill violet">计划</span></td></tr>
@@ -683,7 +683,7 @@ exclude | starting from 1996-08-12 00:00:00 |
 <script>
 const BARS = {
   gift: [["我们（9B + Chronos-2）",0.476,1],["MoiraiAgent (GPT-5.6)",0.497],["GPT-5.6 Sol",0.565],["tabSutra-39M + 规则",0.627],["TimeBraid-6.7B",0.773],["Claude Opus 4.8",0.781],["Chronos-2（只看历史）",0.795]],
-  cik: [["Gemini-2.5-Flash 直接提示",0.110],["Llama-3.1-405B 直接提示",0.143],["GPT-5.4 直接提示",0.145],["我们（9B + Chronos-2）",0.155,1],["GPT-4o 直接提示",0.191],["DeepSeek-Chat 直接提示",0.225],["TimeBraid-2.5B",0.289],["Chronos-2（只看历史）",0.290],["TimeBraid-6.7B",0.294]]
+  cik: [["Gemini-2.5-Flash 直接提示",0.110],["Llama-3.1-405B 直接提示",0.143],["GPT-5.4 直接提示",0.145],["我们（9B + Chronos-2）",0.154,1],["GPT-4o 直接提示",0.191],["DeepSeek-Chat 直接提示",0.225],["TimeBraid-2.5B",0.289],["Chronos-2（只看历史）",0.290],["TimeBraid-6.7B",0.294]]
 };
 function drawBars(id, rows, max, axis){
   const el = document.getElementById(id); if(!el) return;

@@ -1,4 +1,4 @@
-# Context Is More Than a Token: From Natural Language to Temporal Effects in Time Series Forecasting
+# Forecast with Foresight: Rethinking Context in Time Series Foundation Models
 
 > **汇报页面：** [https://caesarrwang.github.io/tsfm_ctx/](https://caesarrwang.github.io/tsfm_ctx/)（本文件为文字版，结构与页面一致；示例、图表的交互版本见页面）
 >

@@ -50,6 +50,8 @@ nav li a:hover,nav li a.active{color:var(--text);background:var(--panel2);text-d
 .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:18px}
 .eyebrow::before{content:"";width:28px;height:2px;background:var(--accent)}
 .hero h1{font-size:clamp(32px,4.6vw,52px);font-weight:800;margin-bottom:18px}
+.hero h1 .t1{background:none;color:inherit;-webkit-background-clip:initial;background-clip:initial}
+@media(min-width:900px){.hero h1{font-size:clamp(28px,3.1vw,42px)!important}.hero h1 .t1{white-space:nowrap}}
 .hero h1 small{display:block;font-size:.56em;font-weight:700;line-height:1.25;margin-top:12px;color:#d6dbe6}
 .hero h1 span{background:linear-gradient(90deg,var(--accent),var(--accent3));-webkit-background-clip:text;background-clip:text;color:transparent}
 .hero p.lead{font-size:18px;color:var(--muted);max-width:640px}
@@ -301,7 +303,7 @@ table.pw td.res.drop{color:#f87171}
 
 <nav>
   <div class="wrap">
-    <a class="brand" href="#top"><i></i>Structured Context → Forecast</a>
+    <a class="brand" href="#top"><i></i>Context Is More Than a Token</a>
     <ul>
       <li><a href="#top">Abstract</a></li>
       <li><a href="#intro">1 Introduction</a></li>
@@ -317,7 +319,7 @@ table.pw td.res.drop{color:#f87171}
   <div class="wrap grid">
     <div>
       <div class="eyebrow">Abstract · 摘要</div>
-      <h1>Context Is More Than a Token:<small>From Natural Language to <span>Temporal Effects</span> in Time Series Forecasting</small></h1>
+      <h1><span class="t1">Context Is More Than a Token:</span><small>From Natural Language to <span>Temporal Effects</span> in Time Series Forecasting</small></h1>
       <p class="lead">背景信息（事件、计划、约束、外部输入）往往决定了序列的未来，但时序基础模型读不懂文本，而让大模型直接给出预测，代价高且过程不可检查。我们在文本和预测之间引入一种带形式语义的<b style="color:var(--text)">结构化情境表征</b>：9B 语言模型把文本解析成效应，确定性编译器把效应变成逐步约束和协变量，并<b style="color:var(--text)">可证明</b>地保证真陈述不会让预测变差；以效应为条件的时序模型由真实序列<b style="color:var(--text)">自监督</b>训练，不需要成对的文本–序列数据。</p>
       <div class="stats">
         <div class="stat"><b>0.476</b><span>GIFT-Eval-CTX 总分<br>榜单第一 0.497</span></div>

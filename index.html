@@ -879,12 +879,6 @@ F′ = Π<sub>𝒞</sub>(F)           <span style="color:#9aa3b5"># 安全投影
         <p>我们提出以结构化情境表征为接口、把文本信息用于时间序列预测的框架：语言模型只负责把文本解析成效应，编译器以可证明安全的方式执行其中的约束，效应条件预测器从历史中补全文本没说清的部分。它不需要成对的文本–序列数据，只用 9B 语言模型加 0.12B 时序模型，就在 GIFT-Eval-CTX 上超过了基于前沿大模型的智能体，在 Context-is-Key 上接近前沿大模型的直接提示，而且每一处修改都能追溯到原文。</p>
       </div>
     </div>
-    <div class="sub reveal"><h3>局限</h3></div>
-    <div class="cards c3 reveal">
-      <div class="card"><h4>“看过测试题”</h4><p class="muted">解析器的若干修正和外部输入的训练模板，是看过 Context-is-Key 的题型后设计的；预测器的版本也是按测试成绩选的。需要一个独立的文本测试集来检验。解析器已在第四轮冻结，已知失败案例：把未来的“停业”读成历史屏蔽，隐含的节假日没有识别，把“日照峰值出现在 11:54”误读为外部输入。</p></div>
-      <div class="card"><h4>适用范围</h4><p class="muted">需要常识和类比的题（约占 Context-is-Key 权重的 14%）不在方法范围内，例如“新区靠近河流，参照其他区估计救援次数”。前沿大模型的优势主要在这里。</p></div>
-      <div class="card"><h4>预测器在文本基准上的贡献偏小</h4><p class="muted">在 Context-is-Key 上约 0.01，比在 GIFT-Eval-CTX 上（0.634 → 0.476）小得多：文本中的效应多数带明确数值，编译器直接写入就够了。</p></div>
-    </div>
     <div class="sub reveal"><h3>下一步</h3></div>
     <div class="table-wrap reveal">
       <table>

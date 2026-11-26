@@ -247,7 +247,44 @@ footer .wrap{display:grid;grid-template-columns:1fr 1fr;gap:28px}
       <p style="margin:0">没有一种方法能<b>既用上背景，又保住时序基础模型的数值预测能力</b>。会预测的模型读不了背景，读得了背景的模型又预测不好。</p>
     </div>
 
-    <div class="sub reveal"><span class="tag">1.2</span><h3>关键观察：背景一旦变成“显式的未来时间效应”，时序模型就能用上</h3></div>
+    <div class="sub reveal"><span class="tag">1.2</span><h3>理想的上下文感知时序模型应该是什么样的？</h3></div>
+    <p class="reveal muted" style="max-width:900px">针对上面的缺口，我们先明确“好”的标准：一个理想的上下文感知时序模型应同时满足以下七条要求。再用这些要求逐一检验现有方法。</p>
+    <div class="cards c3 reveal">
+      <div class="card"><h4>R1 · 没有上下文时不退化</h4><p class="muted">没有文本、或文本与预测无关时，应保持时序基础模型原有的预测能力，不能因为“多了一个文本通道”而变差。</p></div>
+      <div class="card"><h4>R2 · 有上下文时确实提升</h4><p class="muted">给出有用的上下文时，预测应明显变好；信息越具体（精确数值 &gt; 大致幅度 &gt; 只给方向），提升越大。</p></div>
+      <div class="card"><h4>R3 · 提升来自文本内容</h4><p class="muted">改变或去掉文本，预测应随之改变；无关的干扰句不应改变预测。提升不能来自额外混入的数值或模型集成。</p></div>
+      <div class="card"><h4>R4 · 时间对齐</h4><p class="muted">“下午 2 点到 5 点”“下周一起持续 10 天”这类陈述，应作用到预测期中正确的时间步上。</p></div>
+      <div class="card"><h4>R5 · 对错误信息稳健</h4><p class="muted">文本可能不准、可能是传闻。读错或文本有误时，损失应当有界；可信度低的信息应打折扣。</p></div>
+      <div class="card"><h4>R6 · 可溯源</h4><p class="muted">能说清楚预测的哪一段是因为文本中的哪一句而改变、改变了多少，便于人工核查。</p></div>
+    </div>
+    <div class="card reveal" style="margin-top:18px">
+      <h4>R7 · 代价可接受</h4>
+      <p class="muted" style="margin:0">不依赖前沿大模型，也不依赖大规模成对的“文本–序列”训练数据。</p>
+    </div>
+    <div class="table-wrap reveal" style="margin-top:18px">
+      <table>
+        <tr><th>方法类别</th><th>R1 不退化</th><th>R2 有提升</th><th>R3 来自文本</th><th>R4 时间对齐</th><th>R5 稳健</th><th>R6 可溯源</th><th>R7 代价</th></tr>
+        <tr><td>时序基础模型（Chronos-2 等）</td><td>✓</td><td>✗ 读不了上下文</td><td>—</td><td>—</td><td>—</td><td>—</td><td>✓</td></tr>
+        <tr><td>融合式 / 端到端多模态（TaTS、MM-TSFlib、TimeBraid）</td><td>?</td><td>✗ 几乎没有</td><td>✗ 换文本 MSE 变化 &lt;0.5%；文本坍缩</td><td>?</td><td>✗</td><td>✗</td><td>△ 需成对数据</td></tr>
+        <tr><td>大模型直接预测（GPT、Claude、Gemini）</td><td>✗ 不给上下文时比季节性朴素还差</td><td>✓</td><td>✓</td><td>△ 时间换算对 55–75%</td><td>✗ 无保证</td><td>✗</td><td>✗ 前沿大模型</td></tr>
+        <tr><td>智能体（MoiraiAgent）</td><td>?</td><td>✓</td><td>✓</td><td>?</td><td>✗</td><td>△</td><td>✗ 前沿大模型</td></tr>
+        <tr class="ours"><td><b>本文</b></td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓ 损失有界（定理）</td><td>✓</td><td>✓ 9B + 0.12B</td></tr>
+      </table>
+    </div>
+    <p class="note reveal">✓ 满足 · △ 部分满足 · ✗ 不满足 · ? 未见公开证据。本文各项的证据见下方“本文如何满足这些要求”。</p>
+    <details class="reveal"><summary>本文如何满足这些要求（证据）</summary><div class="body">
+      <ul class="tight">
+        <li><b style="color:var(--text)">R1：</b>没有读出任何效应时，直接使用原版 Chronos-2 的预测，与只看历史完全相同；预测器本身只看历史时，GIFT-Eval-CTX 0.787（原版 0.795）。</li>
+        <li><b style="color:var(--text)">R2：</b>GIFT-Eval-CTX 0.795 → 0.476，Context-is-Key 0.290 → 0.152；早期版本的分档实验中，精确数值 0.53、大致幅度 0.55、只给方向 0.68、不给 0.79，随信息具体程度单调提升。</li>
+        <li><b style="color:var(--text)">R3：</b>用电量任务的 7 个变体（含干扰句、拆分叙述、长短新闻）得分完全相同（0.003）；因果混淆任务中的无关陈述没有被读出，得分与只看历史相同（0.192）；没有额外的数值输入或模型集成。</li>
+        <li><b style="color:var(--text)">R4：</b>60 道有答案的题中，时间全部对齐（大模型直接输出为 55%–75%）。</li>
+        <li><b style="color:var(--text)">R5：</b>定理 1–3：真陈述不变差，假陈述损失不超过陈述偏差；早期实验中，假陈述覆盖的步上，完全照做误差 1.6、完全不理 0.43，标为传闻时 0.91–0.96。</li>
+        <li><b style="color:var(--text)">R6：</b>自动生成的预测说明，每处修改都对应原文中的一句话（见 3.6）。</li>
+        <li><b style="color:var(--text)">R7：</b>解析器 9B，预测器 0.12B；预测器的训练不需要任何文本。</li>
+      </ul>
+    </div></details>
+
+    <div class="sub reveal"><span class="tag">1.3</span><h3>关键观察：背景一旦变成“显式的未来时间效应”，时序模型就能用上</h3></div>
     <div class="cards c2 reveal">
       <div class="card">
         <p class="muted">我们做了一个最简单的实验：不训练任何模型，只把 GIFT-Eval-CTX 的背景换算成<b style="color:var(--text)">预测期内逐步的约束</b>（哪几步等于多少、所有步落在什么范围），再套到原版 Chronos-2 的预测上。</p>
@@ -273,7 +310,7 @@ footer .wrap{display:grid;grid-template-columns:1fr 1fr;gap:28px}
       </div>
     </div>
 
-    <div class="sub reveal"><span class="tag">1.3</span><h3>我们的做法：以结构化情境表征为接口</h3></div>
+    <div class="sub reveal"><span class="tag">1.4</span><h3>我们的做法：以结构化情境表征为接口</h3></div>
     <p class="reveal muted" style="max-width:900px">文本里对预测有用的，大多是可以精确表达的<b style="color:var(--text)">效应</b>：某段时间等于多少、不超过多少、上升还是下降、外部输入怎么变。我们把它们定义成一种带形式语义的中间表征，把问题拆成三件各自好做的事：</p>
     <div class="legend reveal"><span><i style="background:#2f6f66"></i>学习的模型</span><span><i style="background:#4a3a17"></i>确定性程序</span></div>
     <div class="flow reveal">
@@ -294,7 +331,7 @@ footer .wrap{display:grid;grid-template-columns:1fr 1fr;gap:28px}
       </table>
     </div>
 
-    <div class="sub reveal"><span class="tag">1.4</span><h3>贡献</h3></div>
+    <div class="sub reveal"><span class="tag">1.5</span><h3>贡献</h3></div>
     <div class="cards c3 reveal">
       <div class="card"><h4>① 结构化情境表征与安全保证</h4><p class="muted">文本和结构化信息编译到同一种带形式语义的中间表示。我们证明：陈述为真时，约束投影不会增加 CRPS；陈述为假时，增加量不超过陈述的偏差。实证检验中违反 0 次。</p></div>
       <div class="card"><h4>② 不需要成对数据的训练</h4><p class="muted">从真实序列的未来中提取效应，加入“说了但没发生”的陈述、不同精度的描述和人造外部输入，自监督地训练以效应为条件的预测模型。</p></div>

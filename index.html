@@ -182,6 +182,36 @@ mark{background:rgba(245,158,11,.22);color:#fde68a;border-radius:4px;padding:0 2
 .pflow .res b{color:#5eead4}
 .ptype{display:inline-block;font-size:12px;font-weight:600;padding:1px 9px;border-radius:999px;margin-bottom:8px}
 @media(max-width:900px){.pflow{grid-template-columns:1fr}.pflow .arrow{transform:rotate(90deg);height:28px}}
+
+.cm-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px;background:#0d1017}
+table.cm{border-collapse:separate;border-spacing:2px;font-family:var(--mono);font-size:11px;width:auto}
+table.cm th,table.cm td{padding:3px 4px;border:none;text-align:center;white-space:nowrap}
+table.cm th{color:var(--muted);font-weight:500;font-size:10.5px}
+table.cm td.lab{position:sticky;left:0;background:#0d1017;text-align:right;color:var(--text);font-family:var(--sans);font-size:12px;padding-right:10px;z-index:1}
+table.cm td.lab small{color:var(--muted);font-family:var(--mono);margin-left:4px}
+table.cm td.e{color:#55607a}
+table.cm td.v{background:rgba(94,234,212,.16);color:#d7fff7;border-radius:4px}
+table.cm td.up{background:rgba(45,212,191,.45);color:#fff;border-radius:4px}
+table.cm td.dn{background:rgba(239,68,68,.45);color:#fff;border-radius:4px}
+table.cm td.inp{background:rgba(129,140,248,.30);color:#e0e7ff;border-radius:4px}
+#cm-tabs{margin-bottom:14px}
+.rule{font-size:14px;margin:0 0 12px;padding:10px 14px;border:1px solid var(--line);border-left:3px solid #f59e0b;border-radius:10px;background:var(--panel)}
+.rule code{font-size:12px}
+.lay{display:grid;grid-template-columns:150px 1fr 1fr;gap:4px;font-size:12.5px}
+.lay div{padding:6px 8px;border-radius:6px}
+.lay .h{color:var(--muted);font-family:var(--mono);font-size:11.5px;background:none}
+.lay .n{color:var(--text);text-align:right;background:none}
+.lay .past{background:rgba(148,163,184,.12);color:#cbd5e1}
+.lay .fut{background:rgba(94,234,212,.14);color:#d7fff7}
+.lay .futq{background:rgba(255,255,255,.04);color:var(--muted);text-align:center;letter-spacing:.3em}
+.lay .tgt{background:rgba(248,250,252,.10);color:#fff}
+.pipe{display:grid;grid-template-columns:1fr 22px 1.3fr 22px 1fr 22px 1.2fr;align-items:stretch;gap:6px;margin-top:16px}
+.pipe .box{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:13.5px}
+.pipe .box b{display:block;color:var(--text);margin-bottom:2px}
+.pipe .box span{color:var(--muted);font-size:12.5px}
+.pipe .ar{color:#4b5568;font-size:20px;display:flex;align-items:center;justify-content:center}
+@media(max-width:860px){.pipe{grid-template-columns:1fr}.pipe .ar{transform:rotate(90deg)}}
+@media(max-width:760px){.lay{grid-template-columns:90px 1fr 1fr;font-size:11.5px}}
 </style>
 </head>
 <body>
@@ -497,6 +527,15 @@ F′ = Π<sub>𝒞</sub>(F)           <span style="color:#9aa3b5"># 安全投影
     <p class="note reveal">实际输出是每行用“|”分隔的字段（例如 <code>electricity | multiple of usual | fromfor | from 2013-05-28 12:00 for 2 hours | 4 | up | sustained | confirmed | no</code>）；上图把同样的字段逐项展开。更多例子及编译出的逐步序列见 3.7。</p>
 
     <div class="sub reveal"><span class="tag">3.4</span><h3>编译器与安全投影</h3></div>
+
+    <div class="reveal" style="margin-bottom:26px">
+      <h4 style="color:var(--text)">编译：每条效应 → 逐步效应序列</h4>
+      <p class="muted" style="max-width:900px;font-size:14.5px">编译器把每条效应按固定规则写到预测期的各个时间步上，得到 12 条与预测等长的序列（通道）。下表中，行是通道，列是预测期的时间步；<span style="color:#5eead4">有色格</span>是这条效应写入的值，<span style="color:#3a4256">·</span> 表示留空（这一步没有信息）。</p>
+      <div class="tabs" id="cm-tabs"></div>
+      <div class="rule" id="cm-rule"></div>
+      <div class="cm-wrap" id="cm-table"></div>
+      <p class="note" style="margin-top:8px">通道：lo / hi 下界 / 上界（相等即精确值）· dir 方向 · conf 可信度 · glo / ghi 全程下界 / 上界 · trend 趋势模板 · samp 季节幅度 · rec / recv 反复偏移的方向 / 水平 · seas 季节性 · inp 外部输入。</p>
+    </div>
     <p class="reveal muted" style="max-width:860px">预测之后，对已确认的约束做逐步截断：区间约束对每个样本截断，精确值把分布的中位数平移到该值、离散程度不变。设某一步的预测分布为 F，真实值为 y，约束区间为 C = [a, b]。</p>
     <div class="cards c3 reveal">
       <div class="card">
@@ -518,6 +557,19 @@ F′ = Π<sub>𝒞</sub>(F)           <span style="color:#9aa3b5"># 安全投影
     <p class="note reveal">完整的编译示例见 3.7。含义：代码层是可证明的“安全层”，损失只可能来自读错，或者文本本身不准确。端到端模型和大模型直接提示都没有这种保证。</p>
 
     <div class="sub reveal"><span class="tag">3.5</span><h3>效应条件预测器与自监督训练</h3></div>
+
+    <div class="card reveal" style="margin-bottom:18px">
+      <h4 style="color:var(--text)">效应序列如何进入预测器</h4>
+      <p class="muted" style="font-size:14.5px;max-width:940px">Chronos-2 原生支持<b style="color:var(--text)">已知的未来协变量</b>：除了目标序列，还可以输入若干条“历史和未来都已知”的序列。我们把 12 条效应通道作为这样的协变量。关键在于<b style="color:var(--text)">历史部分的填法</b>：每条通道的历史部分都用真实历史按同样的含义填充（例如 lo / hi 的历史部分就是历史真实值），于是模型在历史上能看到“通道里的值”与“目标的实际值”是怎样对应的，再据此读懂未来部分写入的效应。</p>
+      <div class="lay"><div class="h"></div><div class="h">历史部分（L 步）</div><div class="h">未来部分（H 步，已知的未来协变量）</div><div class="n">目标序列</div><div class="tgt">历史真实值：432 383 351 324</div><div class="futq">? ? ? ? ?</div><div class="n">lo / hi</div><div class="past">= 历史真实值（432 383 351 324）</div><div class="fut">精确值、范围、上下限（编译结果）</div><div class="n">dir / conf</div><div class="past">历史中相对平时水平的方向及其强度</div><div class="fut">陈述的方向、可信度</div><div class="n">glo / ghi</div><div class="past">= 历史真实值</div><div class="fut">全程水平范围</div><div class="n">trend</div><div class="past">平滑后的历史（按极差归一）</div><div class="fut">趋势模板</div><div class="n">samp</div><div class="past">历史每个周期的峰谷幅度</div><div class="fut">季节幅度</div><div class="n">rec / recv</div><div class="past">历史中的偏移方向 / 历史真实值</div><div class="fut">反复偏移的方向 / 水平</div><div class="n">seas</div><div class="past">= 1（历史上的季节性就是它自己）</div><div class="fut">季节性：延续 / 不规则 / 无</div><div class="n">inp</div><div class="past">文本给出的历史段输入值</div><div class="fut">文本给出的未来段输入值</div></div>
+      <div class="pipe">
+        <div class="box"><b>输入</b><span>目标序列（只有历史）+ 12 条效应通道（历史 + 未来）</span></div><div class="ar">→</div>
+        <div class="box"><b>Chronos-2（全量微调）</b><span>目标与各通道作为同一组变量，组内注意力在它们之间交换信息；通道的未来部分告诉模型“未来会发生什么”</span></div><div class="ar">→</div>
+        <div class="box"><b>分位数预测</b><span>每一步 21 个分位数 → 25 个样本</span></div><div class="ar">→</div>
+        <div class="box"><b>安全投影（3.4）</b><span>已确认的约束逐步截断；没有陈述的步、精确值的步以原版 Chronos-2 为基础</span></div>
+      </div>
+      <p class="note" style="margin:12px 0 0">为什么要训练：原版 Chronos-2 不知道这些通道的含义，只能当作普通协变量做相关学习。微调让它学会每条通道的语义，例如“dir = −1 但 lo / hi 留空”意味着要从历史推断下降幅度，“inp”与目标之间的关系要从历史中估计。训练数据见下方。</p>
+    </div>
     <div class="cards c2 reveal">
       <div class="card">
         <h4>模型</h4>
@@ -911,12 +963,42 @@ function drawEx(k){
   const m = location.hash.match(/ex=(\d+)/); drawEx(m ? Math.min(+m[1], EX.length - 1) : 0);
 })();
 
+
+const CM = [{"id": "cik5", "title": "精确倍数（用电量）", "H": 24, "rule": "“平时的倍数 4，第 9–10 步” → lo = hi = 平时水平 × 4；dir = +1；conf = 1（已确认）", "rows": {"lo": [null, null, null, null, null, null, null, null, 2199.071, 1950.765, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "hi": [null, null, null, null, null, null, null, null, 2199.071, 1950.765, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "dir": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "conf": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "glo": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "ghi": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "trend": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "samp": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "rec": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "recv": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "seas": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "inp": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null]}, "line": "electricity consumption | multiple of usual | fromfor | from 2013-05-28 12:00 for 2 hours | 4 | - | sustained | confirmed | no"}, {"id": "cik165", "title": "只给方向（节假日）", "H": 72, "rule": "“仅方向：下降，2024-07-04 全天” → dir = −1（第 1–24 步）；conf = 1；lo / hi 留空（不写数值）", "rows": {"lo": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "hi": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "dir": [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "conf": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "glo": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "ghi": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "trend": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "samp": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "rec": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "recv": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "seas": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "inp": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null]}, "line": "road occupancy rates | direction only | on | 2024-07-04 | - | down slight | sustained | confirmed | no"}, {"id": "cik125", "title": "外部输入（因果方程）", "H": 32, "rule": "“X_0 各段取值”（历史 4 段 + 未来 3 段）→ 外部输入通道 inp 逐步填入；其余效应通道留空", "rows": {"lo": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "hi": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "dir": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "conf": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "glo": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "ghi": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "trend": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "samp": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "rec": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "recv": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "seas": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "inp": [0.055, 0.055, 0.055, 0.055, 0.055, 0.055, 0.055, 0.055, 0.055, 0.055, 0.055, 0.055, 0.055, 0.055, 0.055, 0.055, 0.111, 0.111, 0.133, 0.133, 0.133, 0.133, 0.133, 0.133, 0.133, 0.133, 0.133, 0.133, 0.133, 0.133, 0.133, 0.133]}, "line": "input | X_0 | from 2023-11-28 to 2024-01-13 | 0.0443"}, {"id": "gift-3046", "title": "结构化效应（GIFT-Eval-CTX）", "H": 48, "rows": {"lo": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 10.75, 10.75, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "hi": [null, null, null, null, null, null, null, null, null, null, 18.4, 18.4, 18.4, 18.4, null, null, null, null, null, null, null, null, null, null, null, null, null, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, null, null, null, null, null, null, null, null, null, null, null, null], "dir": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, -1.0, -1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "conf": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "glo": [0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9], "ghi": [20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35, 20.35], "trend": [0.063, 0.125, 0.184, 0.241, 0.297, 0.35, 0.401, 0.45, 0.496, 0.541, 0.584, 0.624, 0.663, 0.699, 0.734, 0.766, 0.796, 0.824, 0.85, 0.874, 0.896, 0.916, 0.933, 0.949, 0.963, 0.974, 0.983, 0.991, 0.996, 0.999, 1.0, 0.941, 0.882, 0.824, 0.765, 0.706, 0.647, 0.588, 0.529, 0.471, 0.412, 0.353, 0.294, 0.235, 0.176, 0.118, 0.059, 0.0], "samp": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "rec": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "recv": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "seas": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5], "inp": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null]}, "rule": "level_range → glo / ghi（全部步）；trend → 趋势模板；impulse 偏移（向上 / 向下）→ hi / lo 写极值并写方向；季节性 irregular → seas = 0.5", "line": "Macro + Micro JSON（见 3.7 最后一个例子）"}];
+const CMNAME = {lo:"下界",hi:"上界",dir:"方向",conf:"可信度",glo:"全程下界",ghi:"全程上界",trend:"趋势模板",samp:"季节幅度",rec:"反复偏移方向",recv:"反复偏移水平",seas:"季节性",inp:"外部输入"};
+function drawCM(k){
+  const d = CM[k];
+  document.querySelectorAll("#cm-tabs button").forEach((b,i)=>b.classList.toggle("active", i===k));
+  document.getElementById("cm-rule").innerHTML = '<b>效应：</b><code>' + d.line.replace(/</g,"&lt;") + '</code><br><b>编译规则：</b>' + d.rule;
+  const keys = ["lo","hi","dir","conf","glo","ghi","trend","samp","rec","recv","seas","inp"];
+  const showNum = d.H <= 32;
+  const f = v => Math.abs(v) >= 100 ? v.toFixed(0) : (Math.abs(v) >= 1 ? v.toFixed(1) : v.toFixed(2));
+  let t = '<table class="cm"><tr><th></th>' + Array.from({length:d.H},(_,i)=>'<th>'+(i+1)+'</th>').join("") + '</tr>';
+  keys.forEach(k2 => {
+    const r = d.rows[k2] || [];
+    t += '<tr><td class="lab">' + CMNAME[k2] + '<small>' + k2 + '</small></td>';
+    for (let i = 0; i < d.H; i++) {
+      const v = r[i];
+      const empty = v == null || ((k2 === "dir" || k2 === "conf" || k2 === "rec") && v === 0);
+      if (empty) { t += '<td class="e">·</td>'; continue; }
+      const cls = k2 === "dir" ? (v > 0 ? "up" : "dn") : (k2 === "inp" ? "inp" : "v");
+      t += '<td class="' + cls + '" title="' + k2 + ' 第 ' + (i+1) + ' 步 = ' + v + '">' + (showNum ? f(v) : "&nbsp;") + '</td>';
+    }
+    t += '</tr>';
+  });
+  document.getElementById("cm-table").innerHTML = t + '</table>';
+}
+(function(){ const t=document.getElementById("cm-tabs"); if(!t) return;
+  t.innerHTML = CM.map((d,i)=>'<button>'+d.title+'</button>').join("");
+  t.querySelectorAll("button").forEach((b,i)=>b.addEventListener("click",()=>drawCM(i)));
+  drawCM(0); })();
+
 drawBars("hero-bars", BARS.gift, 0.82, "相对季节性朴素预测的 MASE · 几何平均");
 drawBars("gift-bars", BARS.gift, 0.82, "相对季节性朴素预测的 MASE · 几何平均");
 drawBars("cik-bars", BARS.cik, 0.31, "官方 RCRPS");
 
-document.querySelectorAll(".tabs:not(#ex-tabs) button").forEach(b => b.addEventListener("click", () => {
-  document.querySelectorAll(".tabs:not(#ex-tabs) button").forEach(x => x.classList.toggle("active", x === b));
+document.querySelectorAll(".tabs:not(#ex-tabs):not(#cm-tabs) button").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".tabs:not(#ex-tabs):not(#cm-tabs) button").forEach(x => x.classList.toggle("active", x === b));
   document.querySelectorAll(".tabpanel").forEach(p => p.classList.toggle("active", p.id === b.dataset.tab));
 }));
 

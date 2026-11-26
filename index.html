@@ -229,6 +229,32 @@ table.cm2 td.cur svg{width:100%;height:30px;display:block}
 .howto{font-size:14px;line-height:1.75;margin:0 0 12px;padding:12px 16px;border:1px solid var(--line);border-left:3px solid #5eead4;border-radius:10px;background:var(--panel)}
 .howto b{color:var(--text)}
 .howto ol{margin:4px 0 0;padding-left:20px}
+
+.pw-stage{display:grid;grid-template-columns:150px 1fr;gap:14px;margin-bottom:12px;align-items:start}
+.pw-badge{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--panel)}
+.pw-badge .n{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.pw-badge b{display:block;color:var(--text);font-size:14px;margin:2px 0 6px}
+.who{display:inline-block;font-size:11.5px;font-weight:600;padding:1px 8px;border-radius:999px}
+.who.m{background:rgba(94,234,212,.15);color:#5eead4;border:1px solid rgba(94,234,212,.45)}
+.who.c{background:rgba(245,158,11,.13);color:#fbbf24;border:1px solid rgba(245,158,11,.45)}
+.pw-box{background:#0d1017;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13.5px;line-height:1.65;color:#d6dbe6;overflow:auto}
+.pw-box pre{margin:0;font-family:var(--mono);font-size:12.5px;white-space:pre-wrap;word-break:break-word;color:#d6dbe6;background:none;border:none;padding:0}
+.pw-box .meta{color:#a5b4fc}
+.pw-box details{margin-top:8px;color:var(--muted);font-size:12.5px}
+.pw-box details pre{color:var(--muted);margin-top:6px}
+.pw-ans div{font-family:var(--mono);font-size:12.5px;padding:3px 0;border-bottom:1px dashed #222838;word-break:break-word}
+.pw-ans div:last-child{border-bottom:none}
+.pw-ans i{font-style:normal;color:var(--muted);display:inline-block;width:62px}
+table.pw{width:100%;border-collapse:collapse;font-size:13px}
+table.pw th{color:var(--muted);font-weight:500;text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.pw td{padding:8px;border-bottom:1px solid #1f2533;vertical-align:top}
+table.pw tr.skip td{color:#9aa3b5}
+table.pw tr.drop td{background:rgba(239,68,68,.07)}
+table.pw td.res.ok{color:#5eead4}
+table.pw td.res.drop{color:#f87171}
+.pw-out{font-size:14px;color:var(--text)}
+.pw-out b{color:#5eead4}
+@media(max-width:820px){.pw-stage{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -542,6 +568,14 @@ F′ = Π<sub>𝒞</sub>(F)           <span style="color:#9aa3b5"># 安全投影
       <div class="col code"><div class="hd">编译器计算（确定性程序）</div><div class="res">历史中<b>每 15 天里的 7 天</b>标为缺失<br><span class='muted' style='font-size:13px'>预测器不会把维护期的“零取款”当成正常规律学进去</span></div></div>
     </div>
     <p class="note reveal">实际输出是每行用“|”分隔的字段（例如 <code>electricity | multiple of usual | fromfor | from 2013-05-28 12:00 for 2 hours | 4 | up | sustained | confirmed | no</code>）；上图把同样的字段逐项展开。更多例子及编译出的逐步序列见 3.7。</p>
+
+    <div class="reveal" style="margin:30px 0 10px">
+      <h4 style="color:var(--text)">解析器的工作过程（逐步）</h4>
+      <p class="muted" style="max-width:920px;font-size:14.5px">上面三行是结果；下面拆开看每一步是谁做的、做了什么。只有第 ② 步是模型，其余都是代码：模型只负责<b style="color:var(--text)">读懂原文、指出相关片段</b>，换算成第几步、多少数值由代码完成，模型照抄的片段在原文中找不到就丢弃。例子与 3.4 相同，均为 Context-is-Key 的真实题目和第四轮解析器的实际输出。</p>
+      <div class="tabs" id="pw-tabs"></div>
+      <div id="pw-body"></div>
+    </div>
+
 
     <div class="sub reveal"><span class="tag">3.4</span><h3>编译器与安全投影</h3></div>
 
@@ -985,7 +1019,7 @@ const CM = [{"id": "cik5", "title": "精确倍数（用电量）", "H": 24, "rul
 const CMNAME = {lo:"下界",hi:"上界",dir:"方向",conf:"可信度",glo:"全程下界",ghi:"全程上界",trend:"趋势模板",samp:"季节幅度",rec:"反复偏移方向",recv:"反复偏移水平",seas:"季节性",inp:"外部输入"};
 const CMHOW = {
  cik5: {seg:{1:"04:00–11:00",9:"12:00–13:00",11:"14:00–次日 03:00"},
-   how:'<b>文本：</b>“5 月 28 日 12:00 起 2 小时，用电量是平时的 4 倍”。预测期 24 步，每小时一步，从 04:00 开始。<ol><li>“12:00 起 2 小时”对应<b>第 9、10 步</b>；</li><li>“平时”取历史中同一时段的水平（约 550 和 488），×4 得 <b>2199、1951</b>，写入下界和上界。两者相等，表示这是一个精确值；</li><li>方向写 ↑，可信度写 1（文本是确定的说法）；</li><li>其余 22 步文本没有提到，全部留空，预测器按历史正常预测。</li></ol>'},
+   how:'<b>文本：</b>“5 月 28 日 12:00 起 2 小时，用电量是平时的 4 倍”。预测期 24 步，每小时一步，从 04:00 开始。<ol><li>“12:00 起 2 小时”对应<b>第 9、10 步</b>；</li><li>“平时”指不知道这条文本时的预期，即原版 Chronos-2 只看历史对这两步的预测（约 550 和 488），×4 得 <b>2199、1951</b>，写入下界和上界。两者相等，表示这是一个精确值；</li><li>方向写 ↑，可信度写 1（文本是确定的说法）；</li><li>其余 22 步文本没有提到，全部留空，预测器按历史正常预测。</li></ol>'},
  cik165: {seg:{1:"7 月 4 日（假日）",25:"7 月 5–6 日"},
    how:'<b>文本：</b>“7 月 4 日是节假日，道路占用率会略有下降”，没有说降多少。预测期 72 步，每小时一步，从 7 月 4 日 0:00 开始。<ol><li>“7 月 4 日全天”对应<b>第 1–24 步</b>；</li><li>只知道方向：方向通道写 ↓（−1），可信度写 1；</li><li>没有数值，所以上下界<b>不写</b>。降多少由预测器根据历史中类似的下降来推断，这正是需要训练预测器的原因之一；</li><li>第 25–72 步没有提到，全部留空。</li></ol>'},
  cik125: {seg:{},
@@ -1055,12 +1089,37 @@ function drawCM(k){
   t.querySelectorAll("button").forEach((b,i)=>b.addEventListener("click",()=>drawCM(i)));
   drawCM(0); })();
 
+
+const PW = [{"tab": "精确倍数（用电量）", "head": "Monitored quantity: not named here - it is the quantity the text is about. Start with a line \"NAME: <short name>\".\nForecast origin: 2013-05-28 03:00 (Tuesday). Hourly data, horizon 24 steps.", "body": "This is the electricity consumption recorded in Kilowatt (kW) in city A. Suppose that there is a heat wave in city A <mark>from 2013-05-28 12:00 for 2 hours</mark>, leading to excessive use of air conditioning, and <mark>4</mark> times the usual electricity being consumed. A brief technical issue in the electricity grid caused a major dip of <mark>75</mark>% in electricity consumption <mark>2 weeks ago</mark>. This issue is not expected to happen again this week.", "answer": "NAME: electricity consumption\nelectricity consumption | multiple of usual | fromfor | from 2013-05-28 12:00 for 2 hours | 4 | - | sustained | confirmed | no\nelectricity consumption | change by percent | past | 2 weeks ago | 75 | down | sustained | confirmed | no", "rows": [["NAME 行", "—", "—", "—", "给监测量命名，用来区分“关于目标的陈述”和“关于其他量的陈述”", "ok"], ["第 1 行", "时间 “from 2013-05-28 12:00 for 2 hours” ✓<br>数字 “4” ✓", "起点 03:00、每小时一步：12:00 是第 9 步；“for 2 hours” = 2 步 → <b>第 9–10 步</b>", "类型“平时的倍数”，4 → 记为 ln 4 = 1.386；倍数大于 1，方向记为 ↑", "采用", "ok"], ["第 2 行", "时间 “2 weeks ago” ✓<br>数字 “75” ✓", "关系 past：两周前，在预测起点之前 → 不在预测期内", "—", "不进入预测（是历史上的事件，原文也说本周不会再发生）", "skip"]], "out": "第 9–10 步 · 平时的倍数 = 4 · 方向 ↑ · 已确认"}, {"tab": "只给方向（节假日）", "head": "Monitored quantity: not named here - it is the quantity the text is about. Start with a line \"NAME: <short name>\".\nForecast origin: 2024-07-03 23:00 (Wednesday). Hourly data, horizon 72 steps.", "body": "This series contains the road occupancy rates on a freeway in the San Francisco Bay area. Note that <mark>2024-07-04</mark> is a holiday due to Independence Day. Note that traffic on this freeway typically reduces on holidays.", "answer": "NAME: road occupancy rates\nroad occupancy rates | direction only | on | 2024-07-04 | - | down slight | sustained | confirmed | no", "rows": [["NAME 行", "—", "—", "—", "监测量 = road occupancy rates", "ok"], ["第 1 行", "时间 “2024-07-04” ✓<br>无数字（写 -）", "关系 on：7 月 4 日全天 00:00–23:00；起点 7 月 3 日 23:00、每小时一步 → <b>第 1–24 步</b>", "类型“只给方向”：方向 down，幅度词 slight", "采用", "ok"]], "out": "第 1–24 步 · 只给方向 ↓ · 不写数值 · 已确认"}, {"tab": "外部输入（因果方程）", "head": "Monitored quantity: not named here - it is the quantity the text is about. Start with a line \"NAME: <short name>\".\nForecast origin: 2024-04-03 00:00 (Wednesday). Daily data, horizon 32 steps.", "body": "Given are variables X_0 and X_1, where X_0 is a covariate and X_1 is the variable to forecast. Variables are generated from a linear Structural Vector Autoregressive (SVAR) model with additive gauss noise and a noise scale of 5.533e-04, with lag = 3. The task is to forecast the value of the variable X_1 at time t, given the values of the covariate X_0 and the variable X_1 itself at times t-1, ... t-3. For the first 128 days, the covariate X_0 takes a value of <mark>0.0443</mark> <mark>from 2023-11-28 to 2024-01-13</mark>, <mark>0.1107</mark> <mark>from 2024-01-14 to 2024-02-29</mark>, 0.0443 <mark>from 2024-03-01 to 2024-04-03</mark>. For the next 32 days, the covariate X_0 takes a value of <mark>0.0553</mark> <mark>from 2024-04-04 to 2024-04-19</mark>, 0.1107 <mark>from 2024-04-20 to 2024-04-21</mark>, <mark>0.1328</mark> <mark>from 2024-04-22 to 2024-05-05</mark>. Each day can be treated as a timestep for the forecasting task. The causal parents affect the child variables at different lags. The mathematical equations describing the cause-effect relationship for each variable is given below: X_0^{t} = \\epsilon_0^{t} X_1^{t} = -0.925 * X_0^{t-1} + 1.223 * X_1^{t-1} + -0.990 * X_0^{t-2} + -1.181 * X_1^{t-2} + -0.720 * X_0^{t-3} + 0.751 * X_1^{t-3} + \\epsilon_1^{t} \\epsilon_{i}^{t} given in the equations corresponds to the noise variable with the given noise scale, for X_i^{t}.", "answer": "NAME: X_1\ninput | X_0 | from 2023-11-28 to 2024-01-13 | 0.0443\ninput | X_0 | from 2024-01-14 to 2024-02-29 | 0.1107\ninput | X_0 | from 2024-03-01 to 2024-04-03 | 0.0443\ninput | X_0 | from 2024-04-04 to 2024-04-19 | 0.0553\ninput | X_0 | from 2024-04-20 to 2024-04-21 | 0.1107\ninput | X_0 | from 2024-04-22 to 2024-05-05 | 0.1328", "rows": [["NAME 行", "—", "—", "—", "监测量 = X_1（要预测的变量）", "ok"], ["第 1–3 行", "6 个时间段、6 个数字均在原文中 ✓", "起点 2024-04-03、每天一步 → 都在历史段（11 月 28 日至 4 月 3 日）", "X_0 = 0.0443 / 0.1107 / 0.0443", "采用：填入输入序列的历史部分", "ok"], ["第 4–6 行", "同上 ✓", "4 月 4 日是第 1 步 → <b>第 1–16、17–18、19–32 步</b>", "X_0 = 0.0553 / 0.1107 / 0.1328", "采用：填入输入序列的未来部分", "ok"]], "out": "外部输入 X_0：历史 + 未来逐日取值（160 步）；目标与 X_0 的系数不由解析器给出"}, {"tab": "被丢弃的一行", "head": "Monitored quantity: not named here - …\nForecast origin: 2022-11-19 11:40 (Saturday). Every 600 seconds data, horizon 73 steps.", "body": "This series contains the amount of sunlight (in Watts per squared meter) arriving on a horizontal surface, for a location in Florida, United States. Over the previous 90 days, the maximum sunlight happened <mark>on average at 12:25:33</mark>.", "answer": "NAME: sunlight\ninput | maximum sunlight | on average at 12:25:33 | 12:25:33", "rows": [["NAME 行", "—", "—", "—", "监测量 = sunlight", "ok"], ["第 1 行", "时间 “on average at 12:25:33” ✓<br>数值 “12:25:33” ✗ 既不是数字也不是状态词", "—", "—", "<b>丢弃</b>：模型把“最大日照的平均时刻”误当成输入时间表，代码核对不通过", "drop"]], "out": "没有可用的效应：这道题按原版 Chronos-2 只看历史预测"}];
+const PW_INSTR = "List every statement in the text about a monitored quantity, one per line, in this form:\nquantity | type | relation | time expression | number | direction | pace | reliability | repeats\n- type: level, change by amount, change by percent, multiple of usual, upper limit, lower limit, volatility factor, direction only\n- relation: between, from, until, before, after, on, next, startin, by, past, fromfor; write - as the time expression when the statement covers the whole forecast period\n- time expression and number: copy them from the text character for character; never compute or convert. Copy a range as written (15-20). Use - when the statement has no number; write zero when the text says there is none of it (no withdrawals, no readings).\n- direction: up, down or - ; for 'direction only' statements add the size: slight, moderate or strong\n- pace: sustained, gradual or brief; reliability: confirmed or rumour; repeats: yes or no\nLeave out statements about other quantities. If there is nothing, answer NONE.\nAlso list every stated schedule of an input that drives the monitored quantity (a setting, a control, a covariate), over the history or the forecast period, one value per line: input | name of the input | time expression | number. Copy the time expression and the number character for character; write - as the time expression for a starting value that has no time. If the text says the monitored quantity follows the square of the input, add the line: relation | name of the input | square. A list of (time, value) readings of a related series counts as such a schedule; a state (clear, cloudy, open, closed) is copied as the value. For a past period when the monitored quantity was abnormal (maintenance, outage, glitch) and that the text says will not happen in the future, write: exclude | time expression | duration | repeat, copying each part, or - when not stated.";
+function drawPW(k){
+  const d = PW[k];
+  document.querySelectorAll("#pw-tabs button").forEach((b,i)=>b.classList.toggle("active", i===k));
+  const esc = t => String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+  const st = (n, title, who, desc, box) => '<div class="pw-stage"><div class="pw-badge"><div class="n">' + n + '</div><b>' + title + '</b><span class="who ' + (who==="模型"?"m":"c") + '">' + who + '</span>' + (desc ? '<div class="muted" style="font-size:12px;margin-top:6px;line-height:1.5">' + desc + '</div>' : '') + '</div><div class="pw-box">' + box + '</div></div>';
+  let h = "";
+  h += st("①", "拼接输入", "代码", "预测起点、频率、步数取自数据的时间戳",
+    '<pre><span class="meta">' + esc(d.head) + '</span>\n\nText:\n' + d.body + '</pre><details><summary>格式说明（所有题目相同，约 20 行）</summary><pre>' + esc(PW_INSTR) + '</pre></details>');
+  const lines = d.answer.split("\n");
+  h += st("②", "模型输出", "模型", "Qwen3.5-9B + LoRA，贪心解码；每条陈述一行，时间和数字照抄原文",
+    '<div class="pw-ans">' + lines.map((l,i) => '<div><i>' + (i===0 ? "NAME" : "第 " + i + " 行") + '</i>' + esc(l) + '</div>').join("") + '</div>');
+  h += st("③④", "核对与换算", "代码", "照抄检查：片段必须在原文中找到；时间用日历算术换成预测步",
+    '<table class="pw"><tr><th>行</th><th>照抄检查</th><th>时间 → 预测步</th><th>数值</th><th>结果</th></tr>' +
+    d.rows.map(r => '<tr class="' + r[5] + '"><td style="white-space:nowrap">' + r[0] + '</td><td>' + r[1] + '</td><td>' + r[2] + '</td><td>' + r[3] + '</td><td class="res ' + r[5] + '">' + r[4] + '</td></tr>').join("") + '</table>');
+  h += st("⑤", "交给编译器", "代码", "编译成逐步效应序列的过程见 3.4", '<div class="pw-out">→ <b>' + d.out + '</b></div>');
+  document.getElementById("pw-body").innerHTML = h;
+}
+(function(){ const t=document.getElementById("pw-tabs"); if(!t) return;
+  t.innerHTML = PW.map(d=>'<button>'+d.tab+'</button>').join("");
+  t.querySelectorAll("button").forEach((b,i)=>b.addEventListener("click",()=>drawPW(i)));
+  drawPW(0); })();
+
 drawBars("hero-bars", BARS.gift, 0.82, "相对季节性朴素预测的 MASE · 几何平均");
 drawBars("gift-bars", BARS.gift, 0.82, "相对季节性朴素预测的 MASE · 几何平均");
 drawBars("cik-bars", BARS.cik, 0.31, "官方 RCRPS");
 
-document.querySelectorAll(".tabs:not(#ex-tabs):not(#cm-tabs) button").forEach(b => b.addEventListener("click", () => {
-  document.querySelectorAll(".tabs:not(#ex-tabs):not(#cm-tabs) button").forEach(x => x.classList.toggle("active", x === b));
+document.querySelectorAll(".tabs:not(#ex-tabs):not(#cm-tabs):not(#pw-tabs) button").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".tabs:not(#ex-tabs):not(#cm-tabs):not(#pw-tabs) button").forEach(x => x.classList.toggle("active", x === b));
   document.querySelectorAll(".tabpanel").forEach(p => p.classList.toggle("active", p.id === b.dataset.tab));
 }));
 

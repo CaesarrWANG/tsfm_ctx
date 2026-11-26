@@ -45,7 +45,7 @@
 
 ### 1.3 文献中的同样发现
 
-- **Semantics or Structure? Auditing Text Sensitivity in Multimodal Time-Series Forecasting**（Sridhar et al., ICML 2026 Workshop, arXiv 2608.22321）：Aurora、MM-TSFlib、TaTS 在 Time-MMD 上，把文本换成空文本、固定文本、打乱或其他领域的文本，MSE 变化都小于 0.5%；报告的提升来自随文本提供的一列数值预测 `prior_history_avg`（由历史推算，被混入模型输出），而不是文本内容。
+- **Semantics or Structure? Auditing Text Sensitivity in Multimodal Time-Series Forecasting**（Sridhar et al., ICML 2026 Workshop, arXiv 2608.22321）：Aurora、MM-TSFlib、TaTS 在 Time-MMD 上，把文本换成空文本、固定文本、打乱或其他领域的文本，MSE 变化都小于 0.5%；报告的提升来自随文本提供的一列数值 `prior_history_avg`（构建数据集时让大模型根据该行之前的历史给出的数值预测，与滑动平均高度相关，被直接混入模型输出，TaTS 中占一半权重），而不是文本内容。
 - **Does Text Actually Help? Uncovering and Resolving Text Collapse in Multimodal Time Series Forecasting**（Nguyen et al., arXiv 2606.19413）：融合式模型的文本分支“坍缩”成与输入无关的输出；原因是数值历史与未来高度自相关，数值分支占主导。
 
 ### 1.4 现有路线

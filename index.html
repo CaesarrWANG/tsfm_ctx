@@ -233,7 +233,7 @@ footer .wrap{display:grid;grid-template-columns:1fr 1fr;gap:28px}
       <div class="cards c2" style="gap:14px">
         <div>
           <p style="margin:0 0 6px"><b>Semantics or Structure? Auditing Text Sensitivity in Multimodal Time-Series Forecasting</b><br><span class="muted" style="font-size:13px">Sridhar et al., ICML 2026 Workshop · <a href="https://arxiv.org/abs/2608.22321" target="_blank">arXiv 2608.22321</a></span></p>
-          <p class="muted" style="font-size:14.5px;margin:0">审查了 Aurora、MM-TSFlib、TaTS（Time-MMD）：把文本换成空文本、固定文本、打乱的文本或其他领域的文本，MSE 变化都<b style="color:var(--text)">小于 0.5%</b>。文献报告的提升，实际上来自随文本一起提供的一列数值预测 <code>prior_history_avg</code>，它由历史推算得到，被混入模型输出；去掉这一列、文本不动，提升就消失了。</p>
+          <p class="muted" style="font-size:14.5px;margin:0">审查了 Aurora、MM-TSFlib、TaTS（Time-MMD）：把文本换成空文本、固定文本、打乱的文本或其他领域的文本，MSE 变化都<b style="color:var(--text)">小于 0.5%</b>。文献报告的提升，实际上来自随文本一起提供的一列数值 <code>prior_history_avg</code>：构建数据集时让大模型根据该行之前的历史给出的数值预测（与滑动平均高度相关），被直接混入模型输出（TaTS 中占一半权重）；去掉这一列、文本不动，提升就消失了。</p>
         </div>
         <div>
           <p style="margin:0 0 6px"><b>Does Text Actually Help? Uncovering and Resolving Text Collapse in Multimodal Time Series Forecasting</b><br><span class="muted" style="font-size:13px">Nguyen et al., 2026 · <a href="https://arxiv.org/abs/2606.19413" target="_blank">arXiv 2606.19413</a></span></p>
@@ -321,7 +321,7 @@ footer .wrap{display:grid;grid-template-columns:1fr 1fr;gap:28px}
     </div>
     <div class="card reveal" style="margin-top:18px">
       <h4>多模态时序模型真的用上文本了吗？</h4>
-      <p class="muted" style="margin:0">近期研究对“文本带来提升”提出了质疑。<b style="color:var(--text)">Semantics or Structure?</b>（arXiv 2608.22321）发现，Aurora、MM-TSFlib、TaTS 在 Time-MMD 上的提升，来自随文本提供的一列数值预测，而不是文本内容：替换文本后 MSE 变化小于 0.5%。<b style="color:var(--text)">Does Text Actually Help?</b>（arXiv 2606.19413）发现融合式模型的文本分支会“坍缩”成与输入无关的输出，并提出只用文本预测残差的 REST-TS 来缓解。<b style="color:var(--text)">When Does Multimodality Lead to Better Time Series Forecasting?</b>（arXiv 2506.21611）发现文本只在带有历史之外的预测信息时才有帮助。<br><b style="color:var(--text)">区别：</b>这些工作诊断或修补“模型内部的融合”；我们绕开融合，把文本转成显式的未来时间效应，并用“给背景 vs 不给背景”的对比直接验证它被用上了。</p>
+      <p class="muted" style="margin:0">近期研究对“文本带来提升”提出了质疑。<b style="color:var(--text)">Semantics or Structure?</b>（arXiv 2608.22321）发现，Aurora、MM-TSFlib、TaTS 在 Time-MMD 上的提升，来自随文本提供的一列由大模型根据历史生成的数值预测（<code>prior_history_avg</code>），而不是文本内容：替换文本后 MSE 变化小于 0.5%。<b style="color:var(--text)">Does Text Actually Help?</b>（arXiv 2606.19413）发现融合式模型的文本分支会“坍缩”成与输入无关的输出，并提出只用文本预测残差的 REST-TS 来缓解。<b style="color:var(--text)">When Does Multimodality Lead to Better Time Series Forecasting?</b>（arXiv 2506.21611）发现文本只在带有历史之外的预测信息时才有帮助。<br><b style="color:var(--text)">区别：</b>这些工作诊断或修补“模型内部的融合”；我们绕开融合，把文本转成显式的未来时间效应，并用“给背景 vs 不给背景”的对比直接验证它被用上了。</p>
     </div>
     <div class="sub reveal"><h3>定位对比</h3></div>
     <div class="table-wrap reveal">

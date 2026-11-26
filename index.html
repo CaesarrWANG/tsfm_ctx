@@ -224,9 +224,23 @@ footer .wrap{display:grid;grid-template-columns:1fr 1fr;gap:28px}
       </div>
     </div>
     <div class="cards c3 reveal" style="margin-top:18px">
-      <div class="card"><h4>发现 1 · 端到端模型几乎没用上</h4><p class="muted">把文本和序列放进一个模型联合训练的 TimeBraid，在两个基准上都与只看历史的时序模型持平：GIFT-Eval-CTX 0.773 对 0.78–0.80，Context-is-Key 0.289–0.294 对 0.290。背景信息在模型内部被“稀释”了。</p></div>
+      <div class="card"><h4>发现 1 · 端到端和融合式模型几乎没用上</h4><p class="muted">把文本和序列放进一个模型联合训练的 TimeBraid，在两个基准上都与只看历史的时序模型持平：GIFT-Eval-CTX 0.773 对 0.78–0.80，Context-is-Key 0.289–0.294 对 0.290。背景信息在模型内部被“稀释”了。</p></div>
       <div class="card"><h4>发现 2 · 大模型用上了，但不擅长数值</h4><p class="muted">大模型确实在读背景：Claude 1.109 → 0.781，GPT-5.6 0.953 → 0.565。但它们的数值预测底子差：不给背景时比季节性朴素还差；给了背景，Claude 在中期和长期仍是 1.08 / 1.15。</p></div>
       <div class="card"><h4>发现 3 · 时序模型会预测，却读不了背景</h4><p class="muted">Chronos-2 等只看历史就有 0.78–0.80，数值预测能力最强，但没有接收文本或效应的通道。</p></div>
+    </div>
+    <div class="card reveal" style="margin-top:18px">
+      <h4>文献中的同样发现</h4>
+      <div class="cards c2" style="gap:14px">
+        <div>
+          <p style="margin:0 0 6px"><b>Semantics or Structure? Auditing Text Sensitivity in Multimodal Time-Series Forecasting</b><br><span class="muted" style="font-size:13px">Sridhar et al., ICML 2026 Workshop · <a href="https://arxiv.org/abs/2608.22321" target="_blank">arXiv 2608.22321</a></span></p>
+          <p class="muted" style="font-size:14.5px;margin:0">审查了 Aurora、MM-TSFlib、TaTS（Time-MMD）：把文本换成空文本、固定文本、打乱的文本或其他领域的文本，MSE 变化都<b style="color:var(--text)">小于 0.5%</b>。文献报告的提升，实际上来自随文本一起提供的一列数值预测 <code>prior_history_avg</code>，它由历史推算得到，被混入模型输出；去掉这一列、文本不动，提升就消失了。</p>
+        </div>
+        <div>
+          <p style="margin:0 0 6px"><b>Does Text Actually Help? Uncovering and Resolving Text Collapse in Multimodal Time Series Forecasting</b><br><span class="muted" style="font-size:13px">Nguyen et al., 2026 · <a href="https://arxiv.org/abs/2606.19413" target="_blank">arXiv 2606.19413</a></span></p>
+          <p class="muted" style="font-size:14.5px;margin:0">MM-TSFlib、TaTS 的文本分支出现“<b style="color:var(--text)">文本坍缩</b>”：无论输入什么文本，输出几乎相同。原因是数值历史与未来高度自相关，数值分支天然占主导，把文本挤掉了。</p>
+        </div>
+      </div>
+      <p style="margin:14px 0 0;font-size:14.5px">对我们的启发：<b>不要指望模型自己去“注意”文本。</b>把文本转成显式的未来效应，作为逐步的输入和约束直接交给时序模型，它就无法忽略。</p>
     </div>
     <div class="card reveal" style="margin-top:18px;border-color:#2f6f66">
       <h4>缺口</h4>
@@ -296,7 +310,7 @@ footer .wrap{display:grid;grid-template-columns:1fr 1fr;gap:28px}
       <div class="num">02 / Related Work</div>
       <div>
         <h2>相关工作与定位</h2>
-        <p>我们的方法处在四条研究线的交汇处：时序基础模型、用语言模型做预测、文本–序列多模态模型，以及把自然语言解析成可执行表示。</p>
+        <p>我们的方法处在四条研究线的交汇处：时序基础模型、用语言模型做预测、文本–序列多模态模型，以及把自然语言解析成可执行表示。近期还有一组工作专门检验多模态模型是否真的用上了文本。</p>
       </div>
     </div>
     <div class="cards c2 reveal">
@@ -304,6 +318,10 @@ footer .wrap{display:grid;grid-template-columns:1fr 1fr;gap:28px}
       <div class="card"><h4>用语言模型做预测</h4><p class="muted">一类工作把数值序列写成文本，让大模型直接续写（如 LLMTime）；另一类把序列表示对齐到冻结的语言模型（如 Time-LLM）。Context-is-Key 上的强基线是前沿大模型的直接提示。<br><b style="color:var(--text)">区别：</b>我们不让语言模型生成任何预测数值，只让它解析文本。</p></div>
       <div class="card"><h4>文本–序列多模态模型与智能体</h4><p class="muted">TimeBraid 把文本和序列联合建模，依赖大规模成对数据；CAF-7M 等数据集提供成对语料；MoiraiAgent 让前沿大模型调用时序模型作为工具。<br><b style="color:var(--text)">区别：</b>预测器完全不需要成对文本；中间表示可检查，且有理论保证；不依赖前沿大模型。</p></div>
       <div class="card"><h4>语义解析与程序辅助推理</h4><p class="muted">把自然语言解析成可执行的领域语言、把计算交给程序（如 PAL、Toolformer 一类工作），已被证明能减少语言模型的计算错误。<br><b style="color:var(--text)">区别：</b>我们为预测设计了专门的结构化情境表征，并给出了它的语义在 CRPS 下的安全性质。</p></div>
+    </div>
+    <div class="card reveal" style="margin-top:18px">
+      <h4>多模态时序模型真的用上文本了吗？</h4>
+      <p class="muted" style="margin:0">近期研究对“文本带来提升”提出了质疑。<b style="color:var(--text)">Semantics or Structure?</b>（arXiv 2608.22321）发现，Aurora、MM-TSFlib、TaTS 在 Time-MMD 上的提升，来自随文本提供的一列数值预测，而不是文本内容：替换文本后 MSE 变化小于 0.5%。<b style="color:var(--text)">Does Text Actually Help?</b>（arXiv 2606.19413）发现融合式模型的文本分支会“坍缩”成与输入无关的输出，并提出只用文本预测残差的 REST-TS 来缓解。<b style="color:var(--text)">When Does Multimodality Lead to Better Time Series Forecasting?</b>（arXiv 2506.21611）发现文本只在带有历史之外的预测信息时才有帮助。<br><b style="color:var(--text)">区别：</b>这些工作诊断或修补“模型内部的融合”；我们绕开融合，把文本转成显式的未来时间效应，并用“给背景 vs 不给背景”的对比直接验证它被用上了。</p>
     </div>
     <div class="sub reveal"><h3>定位对比</h3></div>
     <div class="table-wrap reveal">

@@ -43,7 +43,12 @@
 | 指标 | 相对季节性朴素预测的 MASE，按组取几何平均 | RCRPS：概率预测误差，重点区域加权，违反约束会被重罚 |
 | 检验的是 | 能否把效应信息用好（预测器） | 能否读懂文本并用好（完整链路） |
 
-### 1.3 现有路线
+### 1.3 文献中的同样发现
+
+- **Semantics or Structure? Auditing Text Sensitivity in Multimodal Time-Series Forecasting**（Sridhar et al., ICML 2026 Workshop, arXiv 2608.22321）：Aurora、MM-TSFlib、TaTS 在 Time-MMD 上，把文本换成空文本、固定文本、打乱或其他领域的文本，MSE 变化都小于 0.5%；报告的提升来自随文本提供的一列数值预测 `prior_history_avg`（由历史推算，被混入模型输出），而不是文本内容。
+- **Does Text Actually Help? Uncovering and Resolving Text Collapse in Multimodal Time Series Forecasting**（Nguyen et al., arXiv 2606.19413）：融合式模型的文本分支“坍缩”成与输入无关的输出；原因是数值历史与未来高度自相关，数值分支占主导。
+
+### 1.4 现有路线
 
 | 路线 | 代表 | 局限 |
 |---|---|---|

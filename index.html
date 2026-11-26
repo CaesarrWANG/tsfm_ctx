@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>效应语言 · 文本条件时序预测</title>
-<meta name="description" content="用背景文本改进时间序列预测：效应语言与以效应语言为接口（进展汇报）">
+<title>结构化情境表征 · 文本条件时序预测</title>
+<meta name="description" content="用背景文本改进时间序列预测：结构化情境表征与以结构化情境表征为接口（进展汇报）">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -156,7 +156,7 @@ footer .wrap{display:grid;grid-template-columns:1fr 1fr;gap:28px}
 
 <nav>
   <div class="wrap">
-    <a class="brand" href="#top"><i></i>Text → Effects → Forecast</a>
+    <a class="brand" href="#top"><i></i>Structured Context → Forecast</a>
     <ul>
       <li><a href="#top">Abstract</a></li>
       <li><a href="#intro">1 Introduction</a></li>
@@ -172,8 +172,8 @@ footer .wrap{display:grid;grid-template-columns:1fr 1fr;gap:28px}
   <div class="wrap grid">
     <div>
       <div class="eyebrow">Abstract · 摘要</div>
-      <h1>用背景文本<br>改进时间序列预测<br>以<span>效应语言</span>为接口</h1>
-      <p class="lead">背景信息（事件、计划、约束、外部输入）往往决定了序列的未来，但时序基础模型读不懂文本，而让大模型直接给出预测，代价高且过程不可检查。我们在文本和预测之间引入一种带形式语义的<b style="color:var(--text)">效应语言</b>：9B 语言模型把文本解析成效应，确定性编译器把效应变成逐步约束和协变量，并<b style="color:var(--text)">可证明</b>地保证真陈述不会让预测变差；以效应为条件的时序模型由真实序列<b style="color:var(--text)">自监督</b>训练，不需要成对的文本–序列数据。</p>
+      <h1>用背景文本<br>改进时间序列预测<br>以<span>结构化情境表征</span>为接口</h1>
+      <p class="lead">背景信息（事件、计划、约束、外部输入）往往决定了序列的未来，但时序基础模型读不懂文本，而让大模型直接给出预测，代价高且过程不可检查。我们在文本和预测之间引入一种带形式语义的<b style="color:var(--text)">结构化情境表征</b>：9B 语言模型把文本解析成效应，确定性编译器把效应变成逐步约束和协变量，并<b style="color:var(--text)">可证明</b>地保证真陈述不会让预测变差；以效应为条件的时序模型由真实序列<b style="color:var(--text)">自监督</b>训练，不需要成对的文本–序列数据。</p>
       <div class="stats">
         <div class="stat"><b>0.476</b><span>GIFT-Eval-CTX 总分<br>榜单第一 0.497</span></div>
         <div class="stat"><b>0.155</b><span>Context-is-Key RCRPS<br>TimeBraid 0.289–0.294</span></div>
@@ -209,8 +209,8 @@ footer .wrap{display:grid;grid-template-columns:1fr 1fr;gap:28px}
       <div class="card"><h4>端到端融合：缺数据、无保证</h4><p class="muted">把文本和序列放进一个模型联合训练（如 TimeBraid），需要大规模成对数据，读错时也没有任何保护。它在两个基准上都接近纯历史预测：0.773 和 0.289–0.294。</p></div>
     </div>
 
-    <div class="sub reveal"><span class="tag">1.2</span><h3>核心思路：在文本和预测之间放一层“效应语言”</h3></div>
-    <p class="reveal muted" style="max-width:900px">文本里对预测有用的，大多是可以精确表达的<b style="color:var(--text)">效应</b>：某段时间等于多少、不超过多少、上升还是下降、外部输入怎么变。我们把它们定义成一种带形式语义的中间语言，把问题拆成三件各自好做的事：</p>
+    <div class="sub reveal"><span class="tag">1.2</span><h3>核心思路：在文本和预测之间放一层“结构化情境表征”</h3></div>
+    <p class="reveal muted" style="max-width:900px">文本里对预测有用的，大多是可以精确表达的<b style="color:var(--text)">效应</b>：某段时间等于多少、不超过多少、上升还是下降、外部输入怎么变。我们把它们定义成一种带形式语义的中间表征，把问题拆成三件各自好做的事：</p>
     <div class="legend reveal"><span><i style="background:#2f6f66"></i>学习的模型</span><span><i style="background:#4a3a17"></i>确定性程序</span></div>
     <div class="flow reveal">
       <div class="step"><div class="n">IN</div><b>背景文本</b><span>或结构化效应（GIFT-Eval-CTX）</span></div>
@@ -232,7 +232,7 @@ footer .wrap{display:grid;grid-template-columns:1fr 1fr;gap:28px}
 
     <div class="sub reveal"><span class="tag">1.3</span><h3>贡献</h3></div>
     <div class="cards c3 reveal">
-      <div class="card"><h4>① 效应语言与安全保证</h4><p class="muted">文本和结构化信息编译到同一种带形式语义的中间表示。我们证明：陈述为真时，约束投影不会增加 CRPS；陈述为假时，增加量不超过陈述的偏差。实证检验中违反 0 次。</p></div>
+      <div class="card"><h4>① 结构化情境表征与安全保证</h4><p class="muted">文本和结构化信息编译到同一种带形式语义的中间表示。我们证明：陈述为真时，约束投影不会增加 CRPS；陈述为假时，增加量不超过陈述的偏差。实证检验中违反 0 次。</p></div>
       <div class="card"><h4>② 不需要成对数据的训练</h4><p class="muted">从真实序列的未来中提取效应，加入“说了但没发生”的陈述、不同精度的描述和人造外部输入，自监督地训练以效应为条件的预测模型。</p></div>
       <div class="card"><h4>③ 小模型、强结果、可溯源</h4><p class="muted">9B + 0.12B 在 GIFT-Eval-CTX 上超过基于 GPT-5.6 的榜单第一（0.476 对 0.497），在 Context-is-Key 上比 TimeBraid 好约 0.13；每个效应都能追溯到原文句子。</p></div>
     </div>
@@ -253,7 +253,7 @@ footer .wrap{display:grid;grid-template-columns:1fr 1fr;gap:28px}
       <div class="card"><h4>时序基础模型</h4><p class="muted">Chronos / Chronos-2、TimesFM、Moirai、Toto 等在大规模序列上预训练，零样本预测能力强。Chronos-2 支持已知的未来协变量，这正是我们把效应注入模型的接口。<br><b style="color:var(--text)">区别：</b>我们不改模型结构，而是给它一种从文本得到协变量的方式，并训练它理解这些协变量。</p></div>
       <div class="card"><h4>用语言模型做预测</h4><p class="muted">一类工作把数值序列写成文本，让大模型直接续写（如 LLMTime）；另一类把序列表示对齐到冻结的语言模型（如 Time-LLM）。Context-is-Key 上的强基线是前沿大模型的直接提示。<br><b style="color:var(--text)">区别：</b>我们不让语言模型生成任何预测数值，只让它解析文本。</p></div>
       <div class="card"><h4>文本–序列多模态模型与智能体</h4><p class="muted">TimeBraid 把文本和序列联合建模，依赖大规模成对数据；CAF-7M 等数据集提供成对语料；MoiraiAgent 让前沿大模型调用时序模型作为工具。<br><b style="color:var(--text)">区别：</b>预测器完全不需要成对文本；中间表示可检查，且有理论保证；不依赖前沿大模型。</p></div>
-      <div class="card"><h4>语义解析与程序辅助推理</h4><p class="muted">把自然语言解析成可执行的领域语言、把计算交给程序（如 PAL、Toolformer 一类工作），已被证明能减少语言模型的计算错误。<br><b style="color:var(--text)">区别：</b>我们为预测设计了专门的效应语言，并给出了它的语义在 CRPS 下的安全性质。</p></div>
+      <div class="card"><h4>语义解析与程序辅助推理</h4><p class="muted">把自然语言解析成可执行的领域语言、把计算交给程序（如 PAL、Toolformer 一类工作），已被证明能减少语言模型的计算错误。<br><b style="color:var(--text)">区别：</b>我们为预测设计了专门的结构化情境表征，并给出了它的语义在 CRPS 下的安全性质。</p></div>
     </div>
     <div class="sub reveal"><h3>定位对比</h3></div>
     <div class="table-wrap reveal">
@@ -263,7 +263,7 @@ footer .wrap{display:grid;grid-template-columns:1fr 1fr;gap:28px}
         <tr><td>大模型直接预测</td><td>GPT、Gemini、Llama 直接提示</td><td>✓</td><td>✓</td><td>—</td><td>—</td><td class="muted">前沿大模型</td></tr>
         <tr><td>端到端多模态</td><td>TimeBraid</td><td>✓</td><td>—</td><td>—</td><td>—</td><td class="muted">1.2B–6.7B</td></tr>
         <tr><td>智能体</td><td>MoiraiAgent</td><td>✓</td><td>✓</td><td>部分</td><td>—</td><td class="muted">前沿大模型</td></tr>
-        <tr class="ours"><td><b>我们</b></td><td>效应语言</td><td>✓</td><td>✓（预测器）</td><td>✓</td><td>✓</td><td class="muted">9B + 0.12B</td></tr>
+        <tr class="ours"><td><b>我们</b></td><td>结构化情境表征</td><td>✓</td><td>✓（预测器）</td><td>✓</td><td>✓</td><td class="muted">9B + 0.12B</td></tr>
       </table>
     </div>
   </div>
@@ -275,8 +275,8 @@ footer .wrap{display:grid;grid-template-columns:1fr 1fr;gap:28px}
     <div class="sec-head reveal">
       <div class="num">03 / Method</div>
       <div>
-        <h2>以效应语言为接口的预测框架</h2>
-        <p>文本前端（Context-is-Key）和结构化前端（GIFT-Eval-CTX）都编译到同一种效应语言，之后的编译、预测、投影完全共用。</p>
+        <h2>以结构化情境表征为接口的预测框架</h2>
+        <p>文本前端（Context-is-Key）和结构化前端（GIFT-Eval-CTX）都编译到同一种结构化情境表征，之后的编译、预测、投影完全共用。</p>
       </div>
     </div>
 
@@ -299,7 +299,7 @@ F′ = Π<sub>𝒞</sub>(F)           <span style="color:#9aa3b5"># 安全投影
         <p class="muted" style="font-size:14px;margin:0">GIFT-Eval-CTX 的结构化效应不需要解析器，直接进入编译器。两个基准共用编译器及之后的全部部分。</p>
       </div>
     </div>
-    <div class="sub reveal"><span class="tag">3.2</span><h3>效应语言</h3></div>
+    <div class="sub reveal"><span class="tag">3.2</span><h3>结构化情境表征</h3></div>
     <div class="table-wrap reveal">
       <table>
         <tr><th>效应</th><th>例子</th><th>语义（编译结果）</th><th>执行</th></tr>
@@ -314,7 +314,7 @@ F′ = Π<sub>𝒞</sub>(F)           <span style="color:#9aa3b5"># 安全投影
     </div>
     <p class="note reveal">每条效应带有可信度（已确认 / 传闻）。传闻只作为提示交给模型，不作为硬约束执行。</p>
 
-    <div class="sub reveal"><span class="tag">3.3</span><h3>解析器：文本 → 效应语言</h3></div>
+    <div class="sub reveal"><span class="tag">3.3</span><h3>解析器：文本 → 结构化情境表征</h3></div>
     <div class="cards c2 reveal">
       <div class="card">
         <h4>模型与输出</h4>
@@ -594,7 +594,7 @@ exclude | starting from 1996-08-12 00:00:00 |
       <div class="num">05 / Conclusion</div>
       <div>
         <h2>结论</h2>
-        <p>我们提出以效应语言为接口、把文本信息用于时间序列预测的框架：语言模型只负责把文本解析成效应，编译器以可证明安全的方式执行其中的约束，效应条件预测器从历史中补全文本没说清的部分。它不需要成对的文本–序列数据，只用 9B 语言模型加 0.12B 时序模型，就在 GIFT-Eval-CTX 上超过了基于前沿大模型的智能体，在 Context-is-Key 上接近前沿大模型的直接提示，而且每一处修改都能追溯到原文。</p>
+        <p>我们提出以结构化情境表征为接口、把文本信息用于时间序列预测的框架：语言模型只负责把文本解析成效应，编译器以可证明安全的方式执行其中的约束，效应条件预测器从历史中补全文本没说清的部分。它不需要成对的文本–序列数据，只用 9B 语言模型加 0.12B 时序模型，就在 GIFT-Eval-CTX 上超过了基于前沿大模型的智能体，在 Context-is-Key 上接近前沿大模型的直接提示，而且每一处修改都能追溯到原文。</p>
       </div>
     </div>
     <div class="sub reveal"><h3>局限</h3></div>
@@ -608,7 +608,7 @@ exclude | starting from 1996-08-12 00:00:00 |
       <table>
         <tr><th>事项</th><th>目的</th><th>状态</th></tr>
         <tr><td>解析器第四轮训练</td><td class="muted">修正 ATM 停用、假日交通等题上的退步</td><td><span class="pill amber">进行中</span></td></tr>
-        <tr><td>换 TimesFM 底座</td><td class="muted">证明效应语言和训练方法不依赖 Chronos-2</td><td><span class="pill violet">计划</span></td></tr>
+        <tr><td>换 TimesFM 底座</td><td class="muted">证明结构化情境表征和训练方法不依赖 Chronos-2</td><td><span class="pill violet">计划</span></td></tr>
         <tr><td>把 GIFT-Eval-CTX 的结构化效应改写成自然文本</td><td class="muted">得到独立、大规模的“文本 → 预测”测试集</td><td><span class="pill violet">计划</span></td></tr>
         <tr><td>消融实验</td><td class="muted">预测器训练数据的各个成分、数据规模曲线；照抄 vs 直接计算</td><td><span class="pill violet">计划</span></td></tr>
         <tr><td>GIFT-Eval-CTX 榜单提交</td><td class="muted">第三方认可的成绩</td><td><span class="pill violet">待定</span></td></tr>

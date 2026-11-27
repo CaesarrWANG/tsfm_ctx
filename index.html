@@ -303,7 +303,7 @@ table.pw td.res.drop{color:#f87171}
 .sr-anat .hd{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;margin-bottom:14px}
 .sr-anat .hd b{font-size:15px}.sr-anat .hd span{color:var(--muted);font-size:13.5px}
 .sr-quote{font-size:14px;color:var(--muted);border-left:2px solid var(--line);padding:2px 0 2px 12px;margin:0 0 14px;line-height:1.6}
-.sr-quote em{font-style:normal;border-radius:4px;padding:0 3px}
+.sr-quote em{font-style:normal;border-radius:4px;padding:0 3px}.sr-quote u{text-decoration:none;border-bottom:1px dashed #8892a6;color:var(--text)}.sr-quote sup{color:var(--text);font-weight:700;margin-left:2px}.sr-l2{opacity:.75}.sr-out{font-size:11.5px;padding:10px 14px;line-height:1.7;margin:0 0 10px;white-space:pre;overflow-x:auto}.sr-out .c{color:#8892a6}.sr-out .l1{color:var(--text)}.sr-out .l2{color:#7d869a}.sr-out .k1{color:var(--text)}.sr-out .k2{color:#7d869a;font-weight:500}.sr-sub{font-size:13px;color:var(--muted);margin:0 0 8px}
 .sr-fields{display:flex;flex-wrap:wrap;gap:6px}
 .sr-f{flex:0 1 auto;background:var(--bg2);border:1px solid var(--line);border-top:3px solid var(--c,#3a4256);border-radius:10px;padding:8px 8px 9px;min-width:0}
 .sr-f small{display:block;font-size:11.5px;color:var(--muted);line-height:1.3;margin-bottom:4px}
@@ -589,8 +589,12 @@ F′ = Π<sub>𝒞</sub>(F)           <span style="color:#9aa3b5"># 安全投影
     <div class="sub reveal" id="s32"><span class="tag">3.2</span><h3>结构化情境表征</h3></div>
     <div class="sr reveal">
       <div class="sr-anat">
-        <div class="hd"><b>一条效应 = 一行 9 个字段</b><span>解析器为文本中每条与未来有关的陈述输出一行；这是 Context-is-Key 用电量任务的真实输出</span></div>
-        <div class="sr-quote">“…a heat wave in city A <em style="color:var(--time);background:rgba(96,165,250,.12)">from 2013-05-28 12:00:00 for 2 hours</em>, … <em style="color:var(--num);background:rgba(251,191,36,.12)">4</em> <em style="color:var(--type);background:rgba(52,211,153,.12)">times the usual</em> electricity being consumed.”</div>
+        <div class="hd"><b>一条效应 = 一行 9 个字段</b><span>Context-is-Key 用电量任务的完整原文，以及解析器的真实输出（先写出量的名称，再每条陈述一行）</span></div>
+        <div class="sr-quote">This is the <u>electricity consumption</u> recorded in Kilowatt (kW) in city A. <span class="sr-l1">Suppose that there is a heat wave in city A <em style="color:var(--time);background:rgba(96,165,250,.12)">from 2013-05-28 12:00:00 for 2 hours</em>, leading to excessive use of air conditioning, and <em style="color:var(--num);background:rgba(251,191,36,.12)">4</em> <em style="color:var(--type);background:rgba(52,211,153,.12)">times the usual</em> electricity being consumed.<sup>①</sup></span> <span class="sr-l2">A brief technical issue in the electricity grid caused a major <em style="color:var(--dir);background:rgba(244,114,182,.12)">dip</em> of <em style="color:var(--num);background:rgba(251,191,36,.12)">75</em><em style="color:var(--type);background:rgba(52,211,153,.12)">%</em> in electricity consumption <em style="color:var(--time);background:rgba(96,165,250,.12)">2 weeks ago</em>. This issue is not expected to happen again this week.<sup>②</sup></span></div>
+        <pre class="sr-out"><span class="c">   NAME: electricity consumption</span>
+<b class="k1">①</b> <span class="l1">electricity consumption | multiple of usual | fromfor | from 2013-05-28 12:00 for 2 hours | 4 | - | sustained | confirmed | no</span>
+<b class="k2">②</b> <span class="l2">electricity consumption | change by percent | past | 2 weeks ago | 75 | down | sustained | confirmed | no</span></pre>
+        <div class="sr-sub">② 说的是两周前的事，在预测期之外，代码会丢弃这一行、不生成约束。下面把第 ① 行拆成 9 个字段：</div>
         <div class="sr-fields"><div class="sr-f"><small>量</small><code>electricity consumption</code></div><div class="sr-f" style="--c:var(--type)"><small>类型</small><code>multiple of usual</code></div><div class="sr-f"><small>关系</small><code>fromfor</code></div><div class="sr-f" style="--c:var(--time)"><small>时间（照抄）</small><code>from 2013-05-28 12:00 for 2 hours</code></div><div class="sr-f" style="--c:var(--num)"><small>数值（照抄）</small><code>4</code></div><div class="sr-f dim" style="--c:var(--dir)"><small>方向</small><code>–</code></div><div class="sr-f"><small>节奏</small><code>sustained</code></div><div class="sr-f"><small>可信度</small><code>confirmed</code></div><div class="sr-f dim"><small>是否重复</small><code>no</code></div></div>
         <div class="sr-legend"><span><i style="background:var(--time)"></i>时间、数值：从原文逐字照抄，由代码核对并换算</span><span><i style="background:var(--type)"></i>类型、方向：由模型理解</span><span><i style="background:#3a4256"></i>其余字段：固定词表</span></div>
       </div>
